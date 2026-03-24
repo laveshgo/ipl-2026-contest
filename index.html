@@ -28,7 +28,9 @@
   .header h1 { font-size: 2.2em; font-weight: 800; position: relative; background: linear-gradient(90deg, var(--gold), #fff, var(--gold)); -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text; }
   .header p { color: var(--muted); margin-top: 6px; position: relative; font-size: 0.95em; }
 
-  .live-badge { display: inline-block; background: var(--green); color: #fff; padding: 2px 10px; border-radius: 12px; font-size: 0.7em; font-weight: 700; margin-left: 8px; animation: livePulse 2s infinite; vertical-align: middle; position: relative; }
+  .live-badge { display: inline-block; padding: 2px 10px; border-radius: 12px; font-size: 0.55em; font-weight: 700; margin-left: 8px; animation: livePulse 2s infinite; vertical-align: middle; position: relative; letter-spacing: 0.5px; -webkit-text-fill-color: initial; -webkit-background-clip: initial; background-clip: initial; }
+  .live-badge.open { background: var(--green); color: #fff; }
+  .live-badge.locked { background: var(--accent); color: #fff; }
   @keyframes livePulse { 0%, 100% { opacity: 1; } 50% { opacity: 0.6; } }
 
   .tabs { display: flex; background: var(--secondary); border-bottom: 1px solid var(--border); overflow-x: auto; position: sticky; top: 0; z-index: 100; }
@@ -97,9 +99,10 @@
   .btn:disabled { opacity: 0.5; cursor: not-allowed; transform: none; }
   .btn-group { display: flex; gap: 10px; margin-top: 20px; flex-wrap: wrap; }
 
-  .leaderboard-table { width: 100%; border-collapse: collapse; }
-  .leaderboard-table th { text-align: left; padding: 12px; font-size: 0.8em; color: var(--muted); text-transform: uppercase; letter-spacing: 0.5px; border-bottom: 1px solid var(--border); }
-  .leaderboard-table td { padding: 12px; border-bottom: 1px solid var(--border); font-size: 0.95em; }
+  .leaderboard-wrap { overflow-x: auto; -webkit-overflow-scrolling: touch; }
+  .leaderboard-table { width: 100%; border-collapse: collapse; min-width: 480px; }
+  .leaderboard-table th { text-align: left; padding: 12px; font-size: 0.8em; color: var(--muted); text-transform: uppercase; letter-spacing: 0.5px; border-bottom: 1px solid var(--border); white-space: nowrap; }
+  .leaderboard-table td { padding: 12px; border-bottom: 1px solid var(--border); font-size: 0.95em; white-space: nowrap; }
   .leaderboard-table tr:hover td { background: rgba(255,255,255,0.02); }
   .medal { font-size: 1.3em; }
   .points-badge { display: inline-block; background: var(--accent2); padding: 4px 12px; border-radius: 20px; font-weight: 700; font-size: 0.85em; }
@@ -221,6 +224,9 @@
   .cons-bar.bar-3 { background: linear-gradient(90deg, #27ae60, #2ecc71); }
   .cons-bar.bar-4 { background: linear-gradient(90deg, #8e44ad, #9b59b6); }
   .cons-bar.bar-5 { background: linear-gradient(90deg, #d35400, #e67e22); }
+  .cons-item-wrap { margin-bottom: 4px; }
+  .cons-voters { font-size: 0.78em; color: var(--gold); padding: 4px 0 4px 150px; }
+  .cons-voters.hidden { display: none; }
 
   @media (max-width: 600px) {
     .header h1 { font-size: 1.5em; }
@@ -241,12 +247,17 @@
 
     /* Participant table — card layout on mobile */
     .ptable thead { display: none; }
-    .ptable, .ptable tbody, .ptable tr, .ptable td { display: block; width: 100%; }
-    .ptable tr { background: var(--bg); border: 1px solid var(--border); border-radius: 8px; padding: 12px; margin-bottom: 10px; position: relative; }
-    .ptable tr:hover > td { background: none; }
-    .ptable td { border: none; padding: 3px 0; font-size: 0.85em; }
-    .ptable td:first-child { font-size: 1em; margin-bottom: 4px; }
-    .ptable td:last-child { position: absolute; top: 12px; right: 12px; }
+    .ptable, .ptable tbody { display: block; width: 100%; }
+    .ptable tr.p-card { display: flex; flex-wrap: wrap; align-items: center; gap: 8px; background: var(--bg); border: 1px solid var(--border); border-radius: 10px; padding: 12px 14px; margin-bottom: 10px; position: relative; }
+    .ptable tr.p-card:hover > td { background: none; }
+    .ptable tr.p-card td { display: inline-flex; align-items: center; border: none; padding: 0; font-size: 0.85em; }
+    .ptable tr.p-card td:first-child { font-size: 1em; font-weight: 700; width: calc(100% - 40px); margin-bottom: 2px; }
+    .ptable tr.p-card td:nth-child(2) { order: 2; }
+    .ptable tr.p-card td:nth-child(3) { order: 3; }
+    .ptable tr.p-card td:nth-child(4) { order: 4; }
+    .ptable tr.p-card td:last-child { position: absolute; top: 12px; right: 12px; }
+    .ptable tr.pred-expand-row { display: block; border: none; margin-top: -10px; margin-bottom: 10px; }
+    .ptable tr.pred-expand-row td { display: block; border: none; padding: 0; }
 
     /* Stat row */
     .stat-row { gap: 8px; }
@@ -256,6 +267,7 @@
     /* Consensus bars */
     .cons-item { flex-wrap: wrap; }
     .cons-item .cons-label { min-width: 100px; font-size: 0.8em; }
+    .cons-voters { padding-left: 0; }
 
     /* Export grid scroll hint */
     .export-grid { font-size: 0.72em; }
@@ -269,6 +281,15 @@
 
     /* Deadline bar */
     .deadline-bar { flex-direction: column; align-items: flex-start; gap: 6px; font-size: 0.85em; }
+
+    /* Leaderboard table — scrollable on mobile */
+    .leaderboard-wrap { margin: 0 -8px; padding: 0 8px; }
+    .leaderboard-table { min-width: 520px; }
+    .leaderboard-table th { padding: 10px 8px; font-size: 0.72em; }
+    .leaderboard-table td { padding: 10px 8px; font-size: 0.85em; }
+
+    /* Prediction expand view */
+    .pred-expand-row { border: none !important; padding: 0 !important; margin-top: -10px !important; }
   }
 </style>
 </head>
@@ -317,7 +338,7 @@
 <div class="conn-status online" id="connStatus">You are offline. Changes will sync when reconnected.</div>
 
 <div class="header">
-  <h1>IPL 2026 Prediction Contest <span class="live-badge">LIVE</span></h1>
+  <h1>IPL 2026 Prediction Contest <span class="live-badge open" id="statusBadge">OPEN</span></h1>
   <p>Predict. Compete. Bragging rights forever.</p>
   <div style="margin-top:8px; position:relative;">
     <span class="group-badge" onclick="showGroupOverlay()" id="groupBadgeHeader">
@@ -790,6 +811,18 @@ function updateDeadlineUI() {
 
   const locked = isPredictionLocked();
   const deadlinePassed = isDeadlinePassed();
+
+  // Update header status badge
+  const badge = document.getElementById('statusBadge');
+  if (badge) {
+    if (locked) {
+      badge.textContent = 'LOCKED';
+      badge.className = 'live-badge locked';
+    } else {
+      badge.textContent = 'OPEN';
+      badge.className = 'live-badge open';
+    }
+  }
 
   if (locked) {
     if (deadlinePassed && !state.forceLocked) {
@@ -1438,11 +1471,11 @@ function renderParticipants() {
     // Remove button (admin)
     let removeHtml = '<button class="lock-btn" onclick="removeParticipant(\'' + esc + '\')" title="Remove participant" style="font-size:0.75em; padding:3px 8px;">&times;</button>';
 
-    html += '<tr><td><strong>' + p + '</strong></td><td>' + statusHtml + '</td><td>' + lockHtml + '</td><td>' + viewHtml + '</td><td>' + removeHtml + '</td></tr>';
+    html += '<tr class="p-card"><td><strong>' + p + '</strong></td><td>' + statusHtml + '</td><td>' + lockHtml + '</td><td>' + viewHtml + '</td><td>' + removeHtml + '</td></tr>';
 
     // Expandable prediction row
     if (hasPred) {
-      html += '<tr id="' + safeId + '" class="hidden"><td colspan="5">' + renderPredictionView(p) + '</td></tr>';
+      html += '<tr id="' + safeId + '" class="hidden pred-expand-row"><td colspan="5">' + renderPredictionView(p) + '</td></tr>';
     }
   });
 
@@ -1453,29 +1486,42 @@ function renderParticipants() {
 
 function renderConsensus() {
   const div = document.getElementById('consensusContent');
-  const preds = state.participants.filter(p => !!state.predictions[p]).map(p => state.predictions[p]);
-  const total = preds.length;
+  const namedPreds = state.participants.filter(p => !!state.predictions[p]).map(p => ({ name: p, pred: state.predictions[p] }));
+  const total = namedPreds.length;
 
   if (total < 2) { div.innerHTML = '<p style="color:var(--muted);">Need at least 2 predictions to show consensus.</p>'; return; }
 
-  function countPicks(arr) {
-    const counts = {};
-    arr.forEach(v => { const k = (v || '').trim(); if (k) counts[k] = (counts[k] || 0) + 1; });
-    return Object.entries(counts).sort((a, b) => b[1] - a[1]);
+  // countPicks now takes array of {value, who} and returns [{value, count, voters}]
+  function countPicks(pairs) {
+    const map = {};
+    pairs.forEach(({ value, who }) => {
+      const k = (value || '').trim();
+      if (!k) return;
+      if (!map[k]) map[k] = { count: 0, voters: [] };
+      map[k].count++;
+      if (!map[k].voters.includes(who)) map[k].voters.push(who);
+    });
+    return Object.entries(map).map(([v, d]) => ({ value: v, count: d.count, voters: d.voters })).sort((a, b) => b.count - a.count);
   }
 
+  let consIdx = 0;
   function renderBars(title, picks, barClass, isTeam) {
     if (!picks.length) return '';
     let h = '<div class="cons-category"><h4>' + title + '</h4>';
-    picks.slice(0, 5).forEach(([name, count]) => {
-      const pct = Math.round((count / total) * 100);
-      const tag = isTeam ? teamTag(name) : (getPlayerTeam(name) ? teamTag(getPlayerTeam(name)) : '');
-      const tc = isTeam ? TEAM_COLORS[name] : TEAM_COLORS[getPlayerTeam(name)];
+    picks.slice(0, 5).forEach((item) => {
+      const pct = Math.round((item.count / total) * 100);
+      const tag = isTeam ? teamTag(item.value) : (getPlayerTeam(item.value) ? teamTag(getPlayerTeam(item.value)) : '');
+      const tc = isTeam ? TEAM_COLORS[item.value] : TEAM_COLORS[getPlayerTeam(item.value)];
       const barColor = tc ? 'background:' + tc.bg + ';' : '';
-      h += '<div class="cons-item">';
-      h += '<span class="cons-label">' + name + ' ' + tag + '</span>';
+      const voterNames = item.voters.join(', ');
+      const cid = 'cons-voters-' + (consIdx++);
+      h += '<div class="cons-item-wrap">';
+      h += '<div class="cons-item" title="' + voterNames + '" onclick="toggleConsVoters(\'' + cid + '\')" style="cursor:pointer;">';
+      h += '<span class="cons-label">' + item.value + ' ' + tag + '</span>';
       h += '<div class="cons-bar-bg"><div class="cons-bar ' + barClass + '" style="width:' + pct + '%;' + barColor + '">' + (pct >= 15 ? pct + '%' : '') + '</div></div>';
-      h += '<span class="cons-count">' + count + '/' + total + '</span>';
+      h += '<span class="cons-count">' + item.count + '/' + total + '</span>';
+      h += '</div>';
+      h += '<div id="' + cid + '" class="cons-voters hidden">' + voterNames + '</div>';
       h += '</div>';
     });
     h += '</div>';
@@ -1485,43 +1531,49 @@ function renderConsensus() {
   let h = '';
 
   // Winner consensus
-  h += renderBars('Winner', countPicks(preds.map(p => p.winner)), 'bar-1', true);
+  h += renderBars('Winner', countPicks(namedPreds.map(np => ({ value: np.pred.winner, who: np.name }))), 'bar-1', true);
 
   // Runner-up consensus
-  h += renderBars('Runner-up', countPicks(preds.map(p => p.runnerUp)), 'bar-2', true);
+  h += renderBars('Runner-up', countPicks(namedPreds.map(np => ({ value: np.pred.runnerUp, who: np.name }))), 'bar-2', true);
 
   // Most popular #1 team
-  h += renderBars('Predicted #1 Team', countPicks(preds.map(p => (p.teamRanking && p.teamRanking[0]) || '')), 'bar-3', true);
+  h += renderBars('Predicted #1 Team', countPicks(namedPreds.map(np => ({ value: (np.pred.teamRanking && np.pred.teamRanking[0]) || '', who: np.name }))), 'bar-3', true);
 
-  // Top 4 qualifiers consensus — teams that appear in anyone's top 4
-  const top4picks = [];
-  preds.forEach(p => { if (p.teamRanking) p.teamRanking.slice(0, 4).forEach(t => top4picks.push(t)); });
-  h += renderBars('Top 4 Qualifiers (in anyone\'s top 4)', countPicks(top4picks), 'bar-4', true);
+  // Top 4 qualifiers consensus
+  const top4pairs = [];
+  namedPreds.forEach(np => { if (np.pred.teamRanking) np.pred.teamRanking.slice(0, 4).forEach(t => top4pairs.push({ value: t, who: np.name })); });
+  h += renderBars('Top 4 Qualifiers (in anyone\'s top 4)', countPicks(top4pairs), 'bar-4', true);
 
   // MVP consensus
-  h += renderBars('MVP', countPicks(preds.map(p => p.mvp)), 'bar-5', false);
+  h += renderBars('MVP', countPicks(namedPreds.map(np => ({ value: np.pred.mvp, who: np.name }))), 'bar-5', false);
 
-  // Top run scorers consensus — players that appear in anyone's top 5
-  const runPicks = [];
-  preds.forEach(p => { if (p.runs) p.runs.forEach(r => { if (r) runPicks.push(r); }); });
-  h += renderBars('Top Run Scorers (in anyone\'s top 5)', countPicks(runPicks), 'bar-1', false);
+  // Top run scorers consensus
+  const runPairs = [];
+  namedPreds.forEach(np => { if (np.pred.runs) np.pred.runs.forEach(r => { if (r) runPairs.push({ value: r, who: np.name }); }); });
+  h += renderBars('Top Run Scorers (in anyone\'s top 5)', countPicks(runPairs), 'bar-1', false);
 
-  // Top wicket takers consensus — players that appear in anyone's top 5
-  const wicketPicks = [];
-  preds.forEach(p => { if (p.wickets) p.wickets.forEach(w => { if (w) wicketPicks.push(w); }); });
-  h += renderBars('Top Wicket Takers (in anyone\'s top 5)', countPicks(wicketPicks), 'bar-2', false);
+  // Top wicket takers consensus
+  const wicketPairs = [];
+  namedPreds.forEach(np => { if (np.pred.wickets) np.pred.wickets.forEach(w => { if (w) wicketPairs.push({ value: w, who: np.name }); }); });
+  h += renderBars('Top Wicket Takers (in anyone\'s top 5)', countPicks(wicketPairs), 'bar-2', false);
 
   // Bottom team consensus (last place)
-  h += renderBars('Predicted Last Place', countPicks(preds.map(p => (p.teamRanking && p.teamRanking[9]) || '')), 'bar-1', true);
+  h += renderBars('Predicted Last Place', countPicks(namedPreds.map(np => ({ value: (np.pred.teamRanking && np.pred.teamRanking[9]) || '', who: np.name }))), 'bar-1', true);
 
   div.innerHTML = h;
+}
+
+function toggleConsVoters(id) {
+  var el = document.getElementById(id);
+  if (el) el.classList.toggle('hidden');
 }
 
 function renderPredictionView(name) {
   const pred = state.predictions[name];
   if (!pred) return '';
 
-  let h = '<div class="pred-expand">';
+  let h = '<div class="pred-expand" style="position:relative;">';
+  h += '<button onclick="this.closest(\'tr\').classList.add(\'hidden\')" style="position:absolute;top:10px;right:10px;background:none;border:1px solid var(--border);color:var(--muted);width:28px;height:28px;border-radius:6px;cursor:pointer;font-size:1.1em;display:flex;align-items:center;justify-content:center;" title="Close">&times;</button>';
 
   // Team Rankings
   h += '<h4>Team Rankings</h4><ul class="pred-rank-list">';
@@ -2130,11 +2182,11 @@ function renderLeaderboard() {
   const entries = Object.entries(state.scores).sort((a, b) => b[1].total - a[1].total);
   if (!entries.length) { document.getElementById('leaderboardContent').innerHTML = '<p style="color:var(--muted);">No scores yet.</p>'; document.getElementById('breakdownContent').innerHTML = ''; return; }
   const medals = ['&#127942;','&#129352;','&#129353;'];
-  let html = '<table class="leaderboard-table"><thead><tr><th>#</th><th>Player</th><th>Rankings</th><th>W/RU</th><th>Runs</th><th>Wkts</th><th>MVP</th><th>Total</th></tr></thead><tbody>';
+  let html = '<div class="leaderboard-wrap"><table class="leaderboard-table"><thead><tr><th>#</th><th>Player</th><th>Rankings</th><th>W/RU</th><th>Runs</th><th>Wkts</th><th>MVP</th><th>Total</th></tr></thead><tbody>';
   entries.forEach(([name, bd], i) => {
     html += '<tr><td>' + (i < 3 ? '<span class="medal">' + medals[i] + '</span>' : (i+1)) + '</td><td><strong>' + name + '</strong></td><td>' + bd.ranking + '</td><td>' + (bd.winner+bd.runnerUp) + '</td><td>' + bd.runs + '</td><td>' + bd.wickets + '</td><td>' + bd.mvp + '</td><td><span class="points-badge' + (i===0?' gold':'') + '">' + bd.total + '</span></td></tr>';
   });
-  html += '</tbody></table>';
+  html += '</tbody></table></div>';
   document.getElementById('leaderboardContent').innerHTML = html;
 
   let bh = '';
