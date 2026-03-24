@@ -58,7 +58,8 @@
   .rank-item.touch-placeholder { opacity: 0.2; border-style: dashed; border-color: var(--gold); }
   .rank-item.drop-target-above { border-top: 3px solid var(--gold); margin-top: -3px; }
   .rank-item.drop-target-below { border-bottom: 3px solid var(--gold); margin-bottom: 5px; }
-  .rank-item .drag-handle { display: none; color: var(--muted); font-size: 1.1em; flex-shrink: 0; padding: 4px; }
+  .rank-item .drag-handle { display: none; color: var(--muted); font-size: 1.3em; flex-shrink: 0; padding: 8px 6px; cursor: grab; touch-action: none; }
+  .rank-item .drag-handle:active { cursor: grabbing; color: var(--accent); }
   @media (max-width: 600px) { .rank-item .drag-handle { display: flex; } }
   .rank-number { width: 32px; height: 32px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-weight: 700; font-size: 0.85em; flex-shrink: 0; }
   .rank-number.r1 { background: var(--gold); color: #000; }
@@ -77,7 +78,7 @@
   .ac-wrap input { width: 100%; }
   .ac-list { position: absolute; top: 100%; left: 0; right: 0; background: var(--card); border: 1px solid var(--border); border-top: none; border-radius: 0 0 8px 8px; max-height: 200px; overflow-y: auto; z-index: 500; display: none; }
   .ac-list.show { display: block; }
-  .ac-item { padding: 8px 14px; cursor: pointer; font-size: 0.9em; display: flex; justify-content: space-between; align-items: center; }
+  .ac-item { padding: 8px 14px; cursor: pointer; font-size: 0.9em; display: flex; justify-content: space-between; align-items: center; gap: 8px; }
   .ac-item:hover, .ac-item.active { background: rgba(233,69,96,0.15); }
   .ac-item .ac-team { font-size: 0.72em; color: var(--muted); }
   .ac-mvp-wrap { position: relative; }
@@ -196,7 +197,7 @@
   .pred-expand .pred-item { background: var(--card); padding: 6px 10px; border-radius: 6px; font-size: 0.85em; }
   .pred-expand .pred-item .lbl { color: var(--muted); font-size: 0.8em; }
   .pred-expand .pred-rank-list { list-style: none; }
-  .pred-expand .pred-rank-list li { display: flex; align-items: center; gap: 8px; padding: 4px 0; font-size: 0.85em; }
+  .pred-expand .pred-rank-list li { display: flex; align-items: center; gap: 8px; padding: 5px 8px; font-size: 0.85em; border-radius: 4px; margin-bottom: 2px; }
   .pred-expand .pred-rank-list li .rnum { width: 24px; height: 24px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-weight: 700; font-size: 0.75em; flex-shrink: 0; }
 
   /* Export grid */
@@ -211,7 +212,7 @@
   .cons-category { margin-bottom: 18px; }
   .cons-category h4 { font-size: 0.88em; color: var(--gold); margin-bottom: 8px; }
   .cons-item { display: flex; align-items: center; gap: 10px; margin-bottom: 4px; font-size: 0.84em; }
-  .cons-item .cons-label { min-width: 140px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+  .cons-item .cons-label { min-width: 140px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; display: flex; align-items: center; gap: 6px; }
   .cons-item .cons-bar-bg { flex: 1; height: 20px; background: var(--secondary); border-radius: 4px; overflow: hidden; position: relative; }
   .cons-item .cons-bar { height: 100%; border-radius: 4px; transition: width 0.4s ease; display: flex; align-items: center; padding-left: 6px; font-size: 0.75em; font-weight: 700; color: #fff; }
   .cons-item .cons-count { min-width: 50px; text-align: right; font-size: 0.78em; color: var(--muted); }
@@ -330,9 +331,9 @@
 <div class="tabs">
   <div class="tab active" data-tab="predictions">My Prediction</div>
   <div class="tab" data-tab="participants">Participants</div>
-  <div class="tab" data-tab="admin">Admin / Results</div>
-  <div class="tab" data-tab="scoring">Scoring Rules</div>
   <div class="tab" data-tab="leaderboard">Leaderboard</div>
+  <div class="tab" data-tab="scoring">Scoring Rules</div>
+  <div class="tab" data-tab="admin">Admin</div>
 </div>
 
 <div class="container">
@@ -353,7 +354,7 @@
     </div>
 
     <div class="info-banner" id="predInfoBanner">
-      Fill in your predictions below, then hit "Submit Prediction." You'll need the group password to submit.
+      Fill in your predictions below, then hit "Submit Prediction." Lock your prediction when you're done!
     </div>
 
     <div id="lockedBanner" class="locked-banner hidden">
@@ -511,6 +512,13 @@
     </div>
 
     <div class="card">
+      <h2>Auto-Fetch from Cricbuzz</h2>
+      <p class="subtitle">One click: fetches standings + top scorers/wicket takers, saves results & recalculates scores. Winner, runner-up & MVP stay untouched.</p>
+      <button class="btn btn-primary" id="fetchCricbuzzBtn" onclick="fetchFromCricbuzz()" style="margin-top:10px;">&#127935; Fetch & Update Scores</button>
+      <div id="fetchStatus" style="margin-top:8px; font-size:0.85em; color:var(--muted);"></div>
+    </div>
+
+    <div class="card">
       <h2>Actual Team Rankings</h2>
       <p class="subtitle">Drag or use arrows to set the actual final standings</p>
       <ul class="rank-list" id="actualTeamRankList"></ul>
@@ -544,8 +552,7 @@
     </div>
 
     <div class="btn-group">
-      <button class="btn btn-gold" onclick="requirePassword('saveActualResults')">Save Actual Results</button>
-      <button class="btn btn-primary" onclick="requirePassword('calculateScores')">Calculate All Scores</button>
+      <button class="btn btn-gold" onclick="requirePassword('saveAndCalculate')">Save Results & Calculate Scores</button>
     </div>
   </div>
 
@@ -592,10 +599,19 @@
 
   <!-- LEADERBOARD TAB -->
   <div class="section" id="sec-leaderboard">
+    <div class="card" style="text-align:center;">
+      <button class="btn btn-primary" id="lbFetchBtn" onclick="fetchAndRefreshLeaderboard()" style="width:100%;">&#127935; Refresh from Cricbuzz</button>
+      <div id="lbFetchStatus" style="margin-top:6px; font-size:0.8em; color:var(--muted);"></div>
+    </div>
     <div class="card">
       <h2>Leaderboard</h2>
       <p class="subtitle">Rankings update in real-time for everyone</p>
       <div id="leaderboardContent"><p style="color:var(--muted); padding:20px 0;">No scores calculated yet.</p></div>
+    </div>
+    <div class="card">
+      <h2>Current Actuals</h2>
+      <p class="subtitle">Live standings & stats from Cricbuzz</p>
+      <div id="actualsDisplay"><p style="color:var(--muted);">No data yet. Hit "Refresh from Cricbuzz" above.</p></div>
     </div>
     <div class="card">
       <h2>Detailed Breakdown</h2>
@@ -632,6 +648,35 @@ const IPL_PLAYERS = {
   "Lucknow Super Giants": ["Rishabh Pant","Nicholas Pooran","Mitchell Marsh","Aiden Markram","Ayush Badoni","Abdul Samad","Matthew Breetzke","Himmat Singh","Shahbaz Ahmed","Arshin Kulkarni","Mayank Prabhu Yadav","Avesh Khan","Mohsin Khan","Manimaran Siddharth","Digvesh Singh Rathi","Prince Yadav","Akash Maharaj Singh","Mohammed Shami","Arjun Sachin Tendulkar","Josh Inglis","Mukul Choudhary","Akshat Raghuwanshi","Anrich Nortje","Wanindu Hasaranga","Naman Tiwari"]
 };
 const ALL_PLAYERS = Object.values(IPL_PLAYERS).flat().sort();
+
+const TEAM_COLORS = {
+  "Chennai Super Kings": { bg: "#ffd700", text: "#1a1a2e", accent: "#f9a602" },
+  "Mumbai Indians": { bg: "#004ba0", text: "#fff", accent: "#0078d7" },
+  "Royal Challengers Bengaluru": { bg: "#d4213d", text: "#fff", accent: "#c41230" },
+  "Kolkata Knight Riders": { bg: "#3a225d", text: "#fff", accent: "#7b3fe4" },
+  "Delhi Capitals": { bg: "#004c93", text: "#fff", accent: "#ef1c25" },
+  "Rajasthan Royals": { bg: "#ea1a85", text: "#fff", accent: "#254aa5" },
+  "Punjab Kings": { bg: "#dd1f2d", text: "#fff", accent: "#a7a9ac" },
+  "SunRisers Hyderabad": { bg: "#ff822a", text: "#000", accent: "#f7643b" },
+  "Gujarat Titans": { bg: "#39b7e8", text: "#000", accent: "#5bcefa" },
+  "Lucknow Super Giants": { bg: "#a72056", text: "#fff", accent: "#ffcc00" }
+};
+
+function teamTag(team) {
+  const c = TEAM_COLORS[team];
+  if (!c) return '';
+  return '<span style="font-size:0.7em;font-weight:700;padding:2px 6px;border-radius:4px;background:' + c.bg + ';color:' + c.text + ';flex-shrink:0;">' + getTeamAbbrShort(team) + '</span>';
+}
+
+function getTeamAbbrShort(team) {
+  const abbrs = { "Chennai Super Kings":"CSK", "Mumbai Indians":"MI", "Royal Challengers Bengaluru":"RCB", "Kolkata Knight Riders":"KKR", "Delhi Capitals":"DC", "Rajasthan Royals":"RR", "Punjab Kings":"PBKS", "SunRisers Hyderabad":"SRH", "Gujarat Titans":"GT", "Lucknow Super Giants":"LSG" };
+  return abbrs[team] || '?';
+}
+
+function teamColorBar(team) {
+  const c = TEAM_COLORS[team];
+  return c ? 'border-left:4px solid '+c.bg+';' : '';
+}
 
 const DEFAULT_SCORING = { rankExact:10, rankOff1:5, rankOff2:2, winner:25, runnerUp:15, runsExact:15, runsPartial:5, wicketsExact:15, wicketsPartial:5, mvp:30 };
 
@@ -703,11 +748,13 @@ function verifyAndRun(pw, actionName) {
       case 'removeParticipant': doRemoveParticipant(pendingRemoveName); break;
       case 'saveActualResults': doSaveActualResults(); break;
       case 'calculateScores': doCalculateScores(); break;
+      case 'saveAndCalculate': doSaveActualResults(); doCalculateScores(); showToast('Results saved & scores recalculated!'); break;
       case 'saveScoring': doSaveScoring(); break;
       case 'resetScoring': doResetScoring(); break;
       case 'saveDeadline': doSaveDeadline(); break;
       case 'toggleLock': doToggleLock(); break;
       case 'toggleAddLock': doToggleAddLock(); break;
+      case 'fetchCricbuzz': fetchFromCricbuzz(); break;
       case 'unlockUser': doUnlockUser(); break;
     }
   });
@@ -986,6 +1033,7 @@ function initUI() {
 function renderAll() {
   renderParticipants(); updatePlayerSelect(); loadScoring(); loadActualResults();
   updateDeadlineUI(); updateAddLockUI();
+  renderActualsDisplay();
   if (Object.keys(state.scores).length > 0) renderLeaderboard();
   const sel = document.getElementById('currentPlayer');
   if (sel.value && state.predictions[sel.value]) loadPredictionForPlayer(sel.value);
@@ -1027,7 +1075,9 @@ function createRankList(containerId, teams) {
     const li = document.createElement('li'); li.className = 'rank-item'; li.draggable = true; li.dataset.team = team;
     const nc = i < 3 ? 'r' + (i+1) : 'rn';
     const esc = team.replace(/'/g, "\\'");
-    li.innerHTML = '<div class="drag-handle">&#9776;</div><div class="rank-number ' + nc + '">' + (i+1) + '</div><div class="rank-team">' + team + '</div><div class="rank-arrows"><button onclick="moveRank(\'' + containerId + '\',\'' + esc + '\',-1)">&#9650;</button><button onclick="moveRank(\'' + containerId + '\',\'' + esc + '\',1)">&#9660;</button></div>';
+    const tc = TEAM_COLORS[team] || {};
+    li.style.borderLeft = '4px solid ' + (tc.bg || 'var(--border)');
+    li.innerHTML = '<div class="drag-handle">&#9776;</div><div class="rank-number ' + nc + '">' + (i+1) + '</div><div class="rank-team" style="flex:1;">' + team + '</div>' + teamTag(team) + '<div class="rank-arrows"><button onclick="moveRank(\'' + containerId + '\',\'' + esc + '\',-1)">&#9650;</button><button onclick="moveRank(\'' + containerId + '\',\'' + esc + '\',1)">&#9660;</button></div>';
 
     // Desktop drag
     li.addEventListener('dragstart', (e) => { li.classList.add('dragging'); e.dataTransfer.setData('text/plain', team); });
@@ -1036,8 +1086,10 @@ function createRankList(containerId, teams) {
     li.addEventListener('dragleave', () => li.classList.remove('drag-over'));
     li.addEventListener('drop', (e) => { e.preventDefault(); li.classList.remove('drag-over'); const from = e.dataTransfer.getData('text/plain'); if (from !== team) reorderList(containerId, from, team); });
 
-    // Touch drag
-    li.addEventListener('touchstart', function(e) {
+    // Touch drag — only from drag handle
+    const handle = li.querySelector('.drag-handle');
+    handle.addEventListener('touchstart', function(e) {
+      e.preventDefault();
       if (e.touches.length > 1) return;
       const t = e.touches[0];
       touchDrag.startY = t.clientY;
@@ -1046,27 +1098,10 @@ function createRankList(containerId, teams) {
       touchDrag.containerId = containerId;
       touchDrag.el = li;
       touchDrag.moved = false;
-      touchDrag.longPressTimer = setTimeout(() => {
-        startTouchDrag(li, t, containerId, team);
-      }, 200);
-    }, { passive: true });
+      startTouchDrag(li, t, containerId, team);
+    }, { passive: false });
 
     li.addEventListener('touchmove', function(e) {
-      if (!touchDrag.active && touchDrag.longPressTimer) {
-        const t = e.touches[0];
-        const dx = Math.abs(t.clientX - touchDrag.startX);
-        const dy = Math.abs(t.clientY - touchDrag.startY);
-        // If moved enough before long press, start immediately
-        if (dy > 10 && dy > dx) {
-          clearTimeout(touchDrag.longPressTimer);
-          touchDrag.longPressTimer = null;
-          startTouchDrag(li, e.touches[0], containerId, team);
-          e.preventDefault();
-        } else if (dx > 10) {
-          clearTimeout(touchDrag.longPressTimer);
-          touchDrag.longPressTimer = null;
-        }
-      }
       if (touchDrag.active && touchDrag.el === li) {
         e.preventDefault();
         moveTouchDrag(e.touches[0]);
@@ -1074,10 +1109,6 @@ function createRankList(containerId, teams) {
     }, { passive: false });
 
     li.addEventListener('touchend', function(e) {
-      if (touchDrag.longPressTimer) {
-        clearTimeout(touchDrag.longPressTimer);
-        touchDrag.longPressTimer = null;
-      }
       if (touchDrag.active && touchDrag.el === li) {
         endTouchDrag();
       }
@@ -1244,7 +1275,7 @@ function setupAutocomplete(inputId, listId) {
     activeIdx = -1;
     list.innerHTML = matches.map((p, i) => {
       const team = getPlayerTeam(p);
-      return '<div class="ac-item" data-idx="' + i + '" data-val="' + p + '"><span>' + p + '</span><span class="ac-team">' + getTeamAbbr(team) + '</span></div>';
+      return '<div class="ac-item" data-idx="' + i + '" data-val="' + p + '"><span>' + p + '</span>' + teamTag(team) + '</div>';
     }).join('');
     list.classList.add('show');
     list.querySelectorAll('.ac-item').forEach(item => {
@@ -1433,14 +1464,17 @@ function renderConsensus() {
     return Object.entries(counts).sort((a, b) => b[1] - a[1]);
   }
 
-  function renderBars(title, picks, barClass) {
+  function renderBars(title, picks, barClass, isTeam) {
     if (!picks.length) return '';
     let h = '<div class="cons-category"><h4>' + title + '</h4>';
     picks.slice(0, 5).forEach(([name, count]) => {
       const pct = Math.round((count / total) * 100);
+      const tag = isTeam ? teamTag(name) : (getPlayerTeam(name) ? teamTag(getPlayerTeam(name)) : '');
+      const tc = isTeam ? TEAM_COLORS[name] : TEAM_COLORS[getPlayerTeam(name)];
+      const barColor = tc ? 'background:' + tc.bg + ';' : '';
       h += '<div class="cons-item">';
-      h += '<span class="cons-label">' + name + '</span>';
-      h += '<div class="cons-bar-bg"><div class="cons-bar ' + barClass + '" style="width:' + pct + '%">' + (pct >= 15 ? pct + '%' : '') + '</div></div>';
+      h += '<span class="cons-label">' + name + ' ' + tag + '</span>';
+      h += '<div class="cons-bar-bg"><div class="cons-bar ' + barClass + '" style="width:' + pct + '%;' + barColor + '">' + (pct >= 15 ? pct + '%' : '') + '</div></div>';
       h += '<span class="cons-count">' + count + '/' + total + '</span>';
       h += '</div>';
     });
@@ -1451,34 +1485,34 @@ function renderConsensus() {
   let h = '';
 
   // Winner consensus
-  h += renderBars('Winner', countPicks(preds.map(p => p.winner)), 'bar-1');
+  h += renderBars('Winner', countPicks(preds.map(p => p.winner)), 'bar-1', true);
 
   // Runner-up consensus
-  h += renderBars('Runner-up', countPicks(preds.map(p => p.runnerUp)), 'bar-2');
+  h += renderBars('Runner-up', countPicks(preds.map(p => p.runnerUp)), 'bar-2', true);
 
   // Most popular #1 team
-  h += renderBars('Predicted #1 Team', countPicks(preds.map(p => (p.teamRanking && p.teamRanking[0]) || '')), 'bar-3');
+  h += renderBars('Predicted #1 Team', countPicks(preds.map(p => (p.teamRanking && p.teamRanking[0]) || '')), 'bar-3', true);
 
   // Top 4 qualifiers consensus — teams that appear in anyone's top 4
   const top4picks = [];
   preds.forEach(p => { if (p.teamRanking) p.teamRanking.slice(0, 4).forEach(t => top4picks.push(t)); });
-  h += renderBars('Top 4 Qualifiers (in anyone\'s top 4)', countPicks(top4picks), 'bar-4');
+  h += renderBars('Top 4 Qualifiers (in anyone\'s top 4)', countPicks(top4picks), 'bar-4', true);
 
   // MVP consensus
-  h += renderBars('MVP', countPicks(preds.map(p => p.mvp)), 'bar-5');
+  h += renderBars('MVP', countPicks(preds.map(p => p.mvp)), 'bar-5', false);
 
   // Top run scorers consensus — players that appear in anyone's top 5
   const runPicks = [];
   preds.forEach(p => { if (p.runs) p.runs.forEach(r => { if (r) runPicks.push(r); }); });
-  h += renderBars('Top Run Scorers (in anyone\'s top 5)', countPicks(runPicks), 'bar-1');
+  h += renderBars('Top Run Scorers (in anyone\'s top 5)', countPicks(runPicks), 'bar-1', false);
 
   // Top wicket takers consensus — players that appear in anyone's top 5
   const wicketPicks = [];
   preds.forEach(p => { if (p.wickets) p.wickets.forEach(w => { if (w) wicketPicks.push(w); }); });
-  h += renderBars('Top Wicket Takers (in anyone\'s top 5)', countPicks(wicketPicks), 'bar-2');
+  h += renderBars('Top Wicket Takers (in anyone\'s top 5)', countPicks(wicketPicks), 'bar-2', false);
 
   // Bottom team consensus (last place)
-  h += renderBars('Predicted Last Place', countPicks(preds.map(p => (p.teamRanking && p.teamRanking[9]) || '')), 'bar-1');
+  h += renderBars('Predicted Last Place', countPicks(preds.map(p => (p.teamRanking && p.teamRanking[9]) || '')), 'bar-1', true);
 
   div.innerHTML = h;
 }
@@ -1493,21 +1527,22 @@ function renderPredictionView(name) {
   h += '<h4>Team Rankings</h4><ul class="pred-rank-list">';
   (pred.teamRanking || []).forEach((team, i) => {
     const nc = i < 3 ? ['background:var(--gold);color:#000','background:var(--silver);color:#000','background:var(--bronze);color:#fff'][i] : 'background:var(--accent2);color:var(--text)';
-    h += '<li><span class="rnum" style="' + nc + '">' + (i+1) + '</span>' + team + '</li>';
+    h += '<li style="' + teamColorBar(team) + 'display:flex;align-items:center;"><span class="rnum" style="' + nc + '">' + (i+1) + '</span><span style="flex:1;">' + team + '</span>' + teamTag(team) + '</li>';
   });
   h += '</ul>';
 
   // Winner & Runner-up
   h += '<h4>Winner & Runner-up</h4><div class="pred-grid">';
-  h += '<div class="pred-item"><div class="lbl">Winner</div>' + (pred.winner || '—') + '</div>';
-  h += '<div class="pred-item"><div class="lbl">Runner-up</div>' + (pred.runnerUp || '—') + '</div>';
+  h += '<div class="pred-item" style="' + teamColorBar(pred.winner) + '"><div class="lbl">Winner</div>' + (pred.winner || '—') + ' ' + teamTag(pred.winner) + '</div>';
+  h += '<div class="pred-item" style="' + teamColorBar(pred.runnerUp) + '"><div class="lbl">Runner-up</div>' + (pred.runnerUp || '—') + ' ' + teamTag(pred.runnerUp) + '</div>';
   h += '</div>';
 
   // Top 5 Runs
   h += '<h4>Top 5 Run Scorers</h4><ul class="pred-rank-list">';
   (pred.runs || []).forEach((p, i) => {
     const nc = i < 3 ? ['background:var(--gold);color:#000','background:var(--silver);color:#000','background:var(--bronze);color:#fff'][i] : 'background:var(--accent2);color:var(--text)';
-    h += '<li><span class="rnum" style="' + nc + '">' + (i+1) + '</span>' + (p || '—') + '</li>';
+    const pt = getPlayerTeam(p);
+    h += '<li style="display:flex;align-items:center;"><span class="rnum" style="' + nc + '">' + (i+1) + '</span><span style="flex:1;">' + (p || '—') + '</span>' + (pt ? teamTag(pt) : '') + '</li>';
   });
   h += '</ul>';
 
@@ -1515,12 +1550,14 @@ function renderPredictionView(name) {
   h += '<h4>Top 5 Wicket Takers</h4><ul class="pred-rank-list">';
   (pred.wickets || []).forEach((p, i) => {
     const nc = i < 3 ? ['background:var(--gold);color:#000','background:var(--silver);color:#000','background:var(--bronze);color:#fff'][i] : 'background:var(--accent2);color:var(--text)';
-    h += '<li><span class="rnum" style="' + nc + '">' + (i+1) + '</span>' + (p || '—') + '</li>';
+    const pt = getPlayerTeam(p);
+    h += '<li style="display:flex;align-items:center;"><span class="rnum" style="' + nc + '">' + (i+1) + '</span><span style="flex:1;">' + (p || '—') + '</span>' + (pt ? teamTag(pt) : '') + '</li>';
   });
   h += '</ul>';
 
   // MVP
-  h += '<h4>MVP</h4><div class="pred-item" style="display:inline-block;"><div class="lbl">Player of the Tournament</div>' + (pred.mvp || '—') + '</div>';
+  const mvpTeam = getPlayerTeam(pred.mvp);
+  h += '<h4>MVP</h4><div class="pred-item" style="display:inline-block;"><div class="lbl">Player of the Tournament</div>' + (pred.mvp || '—') + ' ' + (mvpTeam ? teamTag(mvpTeam) : '') + '</div>';
 
   if (pred.submittedAt) {
     h += '<p style="font-size:0.75em; color:var(--muted); margin-top:12px;">Submitted: ' + new Date(pred.submittedAt).toLocaleString('en-IN', { dateStyle:'medium', timeStyle:'short', timeZone:'Asia/Kolkata' }) + '</p>';
@@ -1743,6 +1780,199 @@ function loadActualResults() {
   }
 }
 
+// =================== CRICBUZZ FETCH ===================
+// Replace with your Cloudflare Worker URL after deploying
+const WORKER_URL = 'https://ipl-proxy.lavesh21goyal.workers.dev';
+const CRICBUZZ_SERIES = '9241'; // IPL 2026
+
+function fetchStatus(msg, isError) {
+  const el = document.getElementById('fetchStatus');
+  el.textContent = msg;
+  el.style.color = isError ? 'var(--accent)' : 'var(--green)';
+}
+
+async function cbFetch(endpoint) {
+  const res = await fetch(WORKER_URL + endpoint + (endpoint.includes('?') ? '&' : '?') + 'series=' + CRICBUZZ_SERIES);
+  if (!res.ok) throw new Error('API error: ' + res.status);
+  return res.json();
+}
+
+function fetchCricbuzzWithPassword() { requirePassword('fetchCricbuzz'); }
+
+async function fetchAndRefreshLeaderboard() {
+  const btn = document.getElementById('lbFetchBtn');
+  const statusEl = document.getElementById('lbFetchStatus');
+  btn.disabled = true;
+  btn.textContent = 'Fetching...';
+  statusEl.textContent = 'Connecting to Cricbuzz...';
+  statusEl.style.color = 'var(--muted)';
+
+  try {
+    // Preserve existing winner/runner-up/MVP
+    const existing = state.actualResults || {};
+    const newResults = {
+      teamRanking: existing.teamRanking || [...TEAMS],
+      winner: existing.winner || '',
+      runnerUp: existing.runnerUp || '',
+      runs: existing.runs || ['','','','',''],
+      wickets: existing.wickets || ['','','','',''],
+      mvp: existing.mvp || ''
+    };
+
+    // Fetch points table
+    statusEl.textContent = 'Fetching standings...';
+    try {
+      const ptData = await cbFetch('/points-table');
+      const ptTeams = parsePointsTable(ptData);
+      if (ptTeams.length) newResults.teamRanking = ptTeams;
+    } catch(e) { console.warn('Points table fetch failed:', e); }
+
+    // Fetch most runs
+    statusEl.textContent = 'Fetching top run scorers...';
+    try {
+      const runsData = await cbFetch('/most-runs');
+      const topRunners = parsePlayerStats(runsData, 5);
+      if (topRunners.length) {
+        for (let i = 0; i < 5; i++) newResults.runs[i] = topRunners[i] || '';
+      }
+    } catch(e) { console.warn('Runs fetch failed:', e); }
+
+    // Fetch most wickets
+    statusEl.textContent = 'Fetching top wicket takers...';
+    try {
+      const wktsData = await cbFetch('/most-wickets');
+      const topWickets = parsePlayerStats(wktsData, 5);
+      if (topWickets.length) {
+        for (let i = 0; i < 5; i++) newResults.wickets[i] = topWickets[i] || '';
+      }
+    } catch(e) { console.warn('Wickets fetch failed:', e); }
+
+    // Save results
+    state.actualResults = newResults;
+    fbSet('actualResults', state.actualResults);
+    loadActualResults();
+
+    // Recalculate scores
+    doCalculateScores();
+
+    statusEl.textContent = 'Updated just now';
+    statusEl.style.color = 'var(--green)';
+  } catch(err) {
+    console.error('Leaderboard refresh error:', err);
+    statusEl.textContent = 'Fetch failed. Try again later.';
+    statusEl.style.color = 'var(--accent)';
+  }
+
+  btn.disabled = false;
+  btn.textContent = '\u{1F3CF} Refresh from Cricbuzz';
+}
+
+async function fetchFromCricbuzz() {
+  const btn = document.getElementById('fetchCricbuzzBtn');
+  btn.disabled = true;
+  btn.textContent = 'Fetching...';
+  fetchStatus('Connecting to Cricbuzz...');
+
+  try {
+    // 1. Fetch points table
+    fetchStatus('Fetching points table...');
+    const ptData = await cbFetch('/points-table');
+    const ptTeams = parsePointsTable(ptData);
+    if (ptTeams.length) {
+      createRankList('actualTeamRankList', ptTeams);
+      fetchStatus('Points table loaded (' + ptTeams.length + ' teams)');
+    } else {
+      fetchStatus('Points table: no data yet', true);
+    }
+
+    // 2. Fetch most runs
+    fetchStatus('Fetching top run scorers...');
+    try {
+      const runsData = await cbFetch('/most-runs');
+      const topRunners = parsePlayerStats(runsData, 5);
+      topRunners.forEach((name, i) => {
+        const el = document.getElementById('arun' + i);
+        if (el) el.value = name;
+      });
+      fetchStatus('Top run scorers loaded (' + topRunners.length + ' players)');
+    } catch(e) { console.warn('Runs fetch failed:', e); }
+
+    // 3. Fetch most wickets
+    fetchStatus('Fetching top wicket takers...');
+    try {
+      const wktsData = await cbFetch('/most-wickets');
+      const topWickets = parsePlayerStats(wktsData, 5);
+      topWickets.forEach((name, i) => {
+        const el = document.getElementById('awkt' + i);
+        if (el) el.value = name;
+      });
+      fetchStatus('Top wicket takers loaded (' + topWickets.length + ' players)');
+    } catch(e) { console.warn('Wickets fetch failed:', e); }
+
+    fetchStatus('Data loaded! Review and save when ready.');
+    showToast('Cricbuzz data loaded into fields.');
+  } catch (err) {
+    console.error('Cricbuzz fetch error:', err);
+    fetchStatus('Fetch failed: ' + err.message + '. Enter results manually.', true);
+    showToast('Cricbuzz fetch failed. Try again or enter manually.', true);
+  }
+
+  btn.disabled = false;
+  btn.textContent = '\u{1F3CF} Fetch Live Data';
+}
+
+function parsePointsTable(data) {
+  const teams = [];
+  try {
+    const table = data.pointsTable;
+    if (!table || !table.length) return teams;
+    const info = table[0].pointsTableInfo || [];
+    // API returns teams in standings order already
+    info.forEach(t => {
+      const fullName = t.teamFullName || t.teamName || '';
+      const matched = matchTeamName(fullName) || matchTeamName(t.teamName || '');
+      if (matched && !teams.includes(matched)) teams.push(matched);
+    });
+  } catch(e) { console.error('Parse points table error:', e); }
+  // Add any missing teams at the end
+  TEAMS.forEach(t => { if (!teams.includes(t)) teams.push(t); });
+  return teams;
+}
+
+function matchTeamName(raw) {
+  if (!raw) return null;
+  const lower = raw.toLowerCase().replace(/[^a-z\s]/g, '').trim();
+  for (const team of TEAMS) {
+    if (team.toLowerCase() === lower) return team;
+  }
+  const abbrMap = { csk:'Chennai Super Kings', mi:'Mumbai Indians', rcb:'Royal Challengers Bengaluru', kkr:'Kolkata Knight Riders', dc:'Delhi Capitals', rr:'Rajasthan Royals', pbks:'Punjab Kings', srh:'SunRisers Hyderabad', gt:'Gujarat Titans', lsg:'Lucknow Super Giants', 'sunrisers hyderabad':'SunRisers Hyderabad' };
+  if (abbrMap[lower]) return abbrMap[lower];
+  for (const team of TEAMS) {
+    const keywords = team.toLowerCase().split(' ');
+    if (keywords.some(k => k.length > 3 && lower.includes(k))) return team;
+  }
+  return null;
+}
+
+function parsePlayerStats(data, count) {
+  const names = [];
+  try {
+    // Cricbuzz format: t20StatsList.values[].values = [playerId, playerName, matches, innings, runs/wickets, avg]
+    const statsList = data.t20StatsList || data.odiStatsList || data.testStatsList || {};
+    const values = statsList.values || [];
+    values.slice(0, count).forEach(item => {
+      const vals = item.values || [];
+      // Player name is at index 1 (index 0 is player ID)
+      const name = vals[1] || '';
+      if (name) {
+        const canonical = findCanonicalPlayer(name.trim());
+        names.push(canonical || name.trim());
+      }
+    });
+  } catch(e) { console.error('Parse player stats error:', e); }
+  return names;
+}
+
 // =================== SCORING ===================
 function doSaveScoring() {
   Object.keys(DEFAULT_SCORING).forEach(k => { state.scoring[k] = parseInt(document.getElementById('sc_' + k).value) || 0; });
@@ -1837,6 +2067,65 @@ function doCalculateScores() {
 }
 
 // =================== LEADERBOARD ===================
+function renderActualsDisplay() {
+  const div = document.getElementById('actualsDisplay');
+  const r = state.actualResults;
+  if (!r) { div.innerHTML = '<p style="color:var(--muted);">No data yet. Hit "Refresh from Cricbuzz" above.</p>'; return; }
+
+  let h = '';
+
+  // Team standings
+  if (r.teamRanking && r.teamRanking.length) {
+    h += '<h4 style="margin-bottom:6px;">Points Table</h4>';
+    h += '<div style="display:flex;flex-wrap:wrap;gap:4px;margin-bottom:12px;">';
+    r.teamRanking.forEach((team, i) => {
+      const c = TEAM_COLORS[team] || {};
+      h += '<span style="font-size:0.75em;padding:3px 8px;border-radius:4px;background:' + (c.bg || 'var(--accent2)') + ';color:' + (c.text || '#fff') + ';font-weight:700;">' + (i+1) + '. ' + getTeamAbbrShort(team) + '</span>';
+    });
+    h += '</div>';
+  }
+
+  // Winner & Runner-up
+  if (r.winner || r.runnerUp) {
+    h += '<div style="display:flex;gap:12px;margin-bottom:12px;flex-wrap:wrap;">';
+    if (r.winner) h += '<div style="font-size:0.85em;"><span style="color:var(--muted);">Winner:</span> <strong>' + r.winner + '</strong> ' + teamTag(r.winner) + '</div>';
+    if (r.runnerUp) h += '<div style="font-size:0.85em;"><span style="color:var(--muted);">Runner-up:</span> <strong>' + r.runnerUp + '</strong> ' + teamTag(r.runnerUp) + '</div>';
+    h += '</div>';
+  }
+
+  // Top run scorers
+  const runs = (r.runs || []).filter(n => n);
+  if (runs.length) {
+    h += '<h4 style="margin-bottom:4px;font-size:0.85em;color:var(--gold);">Top Run Scorers</h4>';
+    h += '<div style="font-size:0.82em;margin-bottom:10px;">';
+    runs.forEach((name, i) => {
+      const pt = getPlayerTeam(name);
+      h += '<span style="margin-right:12px;">' + (i+1) + '. ' + name + (pt ? ' ' + teamTag(pt) : '') + '</span>';
+    });
+    h += '</div>';
+  }
+
+  // Top wicket takers
+  const wkts = (r.wickets || []).filter(n => n);
+  if (wkts.length) {
+    h += '<h4 style="margin-bottom:4px;font-size:0.85em;color:var(--accent);">Top Wicket Takers</h4>';
+    h += '<div style="font-size:0.82em;margin-bottom:10px;">';
+    wkts.forEach((name, i) => {
+      const pt = getPlayerTeam(name);
+      h += '<span style="margin-right:12px;">' + (i+1) + '. ' + name + (pt ? ' ' + teamTag(pt) : '') + '</span>';
+    });
+    h += '</div>';
+  }
+
+  // MVP
+  if (r.mvp) {
+    const mvpTeam = getPlayerTeam(r.mvp);
+    h += '<div style="font-size:0.85em;"><span style="color:var(--muted);">MVP:</span> <strong>' + r.mvp + '</strong> ' + (mvpTeam ? teamTag(mvpTeam) : '') + '</div>';
+  }
+
+  div.innerHTML = h || '<p style="color:var(--muted);">No data yet.</p>';
+}
+
 function renderLeaderboard() {
   const entries = Object.entries(state.scores).sort((a, b) => b[1].total - a[1].total);
   if (!entries.length) { document.getElementById('leaderboardContent').innerHTML = '<p style="color:var(--muted);">No scores yet.</p>'; document.getElementById('breakdownContent').innerHTML = ''; return; }
