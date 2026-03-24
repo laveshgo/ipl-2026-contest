@@ -6,186 +6,84 @@
 <title>IPL 2026 Prediction Contest</title>
 <style>
   :root {
-    --primary: #1a1a2e;
-    --secondary: #16213e;
-    --accent: #e94560;
-    --accent2: #0f3460;
-    --gold: #f5c518;
-    --silver: #c0c0c0;
-    --bronze: #cd7f32;
-    --green: #2ecc71;
-    --bg: #0a0a1a;
-    --card: #1a1a2e;
-    --text: #eee;
-    --muted: #888;
-    --border: #2a2a4a;
+    --primary: #1a1a2e; --secondary: #16213e; --accent: #e94560; --accent2: #0f3460;
+    --gold: #f5c518; --silver: #c0c0c0; --bronze: #cd7f32; --green: #2ecc71;
+    --bg: #0a0a1a; --card: #1a1a2e; --text: #eee; --muted: #888; --border: #2a2a4a;
   }
-
   * { margin: 0; padding: 0; box-sizing: border-box; }
+  body { font-family: 'Segoe UI', system-ui, -apple-system, sans-serif; background: var(--bg); color: var(--text); min-height: 100vh; }
 
-  body {
-    font-family: 'Segoe UI', system-ui, -apple-system, sans-serif;
-    background: var(--bg);
-    color: var(--text);
-    min-height: 100vh;
-  }
-
-  /* Loading overlay */
-  .loading-overlay {
-    position: fixed; inset: 0;
-    background: var(--bg);
-    display: flex; align-items: center; justify-content: center;
-    z-index: 9999; flex-direction: column; gap: 16px;
-  }
+  .loading-overlay { position: fixed; inset: 0; background: var(--bg); display: flex; align-items: center; justify-content: center; z-index: 9999; flex-direction: column; gap: 16px; }
   .loading-overlay.hidden { display: none; }
-  .spinner {
-    width: 48px; height: 48px;
-    border: 4px solid var(--border);
-    border-top-color: var(--accent);
-    border-radius: 50%;
-    animation: spin 0.8s linear infinite;
-  }
+  .spinner { width: 48px; height: 48px; border: 4px solid var(--border); border-top-color: var(--accent); border-radius: 50%; animation: spin 0.8s linear infinite; }
   @keyframes spin { to { transform: rotate(360deg); } }
 
-  /* Connection status */
-  .conn-status {
-    position: fixed; top: 0; left: 0; right: 0;
-    padding: 6px; text-align: center; font-size: 0.8em; font-weight: 600;
-    z-index: 200; transition: transform 0.3s;
-  }
+  .conn-status { position: fixed; top: 0; left: 0; right: 0; padding: 6px; text-align: center; font-size: 0.8em; font-weight: 600; z-index: 200; transition: transform 0.3s; }
   .conn-status.online { background: var(--green); color: #fff; transform: translateY(-100%); }
   .conn-status.offline { background: var(--accent); color: #fff; transform: translateY(0); }
 
-  .header {
-    background: linear-gradient(135deg, var(--primary), var(--accent2));
-    padding: 24px;
-    text-align: center;
-    border-bottom: 3px solid var(--accent);
-    position: relative;
-    overflow: hidden;
-  }
-
-  .header::before {
-    content: '';
-    position: absolute; top: -50%; left: -50%;
-    width: 200%; height: 200%;
-    background: radial-gradient(circle, rgba(233,69,96,0.1) 0%, transparent 60%);
-    animation: pulse 4s ease-in-out infinite;
-  }
-
-  @keyframes pulse {
-    0%, 100% { transform: scale(1); }
-    50% { transform: scale(1.05); }
-  }
-
-  .header h1 {
-    font-size: 2.2em; font-weight: 800; position: relative;
-    background: linear-gradient(90deg, var(--gold), #fff, var(--gold));
-    -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text;
-  }
-
+  .header { background: linear-gradient(135deg, var(--primary), var(--accent2)); padding: 24px; text-align: center; border-bottom: 3px solid var(--accent); position: relative; overflow: hidden; }
+  .header::before { content: ''; position: absolute; top: -50%; left: -50%; width: 200%; height: 200%; background: radial-gradient(circle, rgba(233,69,96,0.1) 0%, transparent 60%); animation: pulse 4s ease-in-out infinite; }
+  @keyframes pulse { 0%, 100% { transform: scale(1); } 50% { transform: scale(1.05); } }
+  .header h1 { font-size: 2.2em; font-weight: 800; position: relative; background: linear-gradient(90deg, var(--gold), #fff, var(--gold)); -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text; }
   .header p { color: var(--muted); margin-top: 6px; position: relative; font-size: 0.95em; }
 
-  .live-badge {
-    display: inline-block; background: var(--green); color: #fff;
-    padding: 2px 10px; border-radius: 12px; font-size: 0.7em;
-    font-weight: 700; margin-left: 8px; animation: livePulse 2s infinite;
-    vertical-align: middle; position: relative;
-  }
+  .live-badge { display: inline-block; background: var(--green); color: #fff; padding: 2px 10px; border-radius: 12px; font-size: 0.7em; font-weight: 700; margin-left: 8px; animation: livePulse 2s infinite; vertical-align: middle; position: relative; }
   @keyframes livePulse { 0%, 100% { opacity: 1; } 50% { opacity: 0.6; } }
 
-  /* Tabs */
-  .tabs {
-    display: flex; background: var(--secondary);
-    border-bottom: 1px solid var(--border);
-    overflow-x: auto; position: sticky; top: 0; z-index: 100;
-  }
-
-  .tab {
-    padding: 14px 24px; cursor: pointer; font-weight: 600; font-size: 0.9em;
-    color: var(--muted); border-bottom: 3px solid transparent;
-    transition: all 0.2s; white-space: nowrap; flex-shrink: 0;
-  }
-
+  .tabs { display: flex; background: var(--secondary); border-bottom: 1px solid var(--border); overflow-x: auto; position: sticky; top: 0; z-index: 100; }
+  .tab { padding: 14px 24px; cursor: pointer; font-weight: 600; font-size: 0.9em; color: var(--muted); border-bottom: 3px solid transparent; transition: all 0.2s; white-space: nowrap; flex-shrink: 0; }
   .tab:hover { color: var(--text); background: rgba(255,255,255,0.03); }
   .tab.active { color: var(--accent); border-bottom-color: var(--accent); }
 
   .container { max-width: 900px; margin: 0 auto; padding: 24px 16px; }
-
   .section { display: none; }
   .section.active { display: block; }
 
-  /* Cards */
-  .card {
-    background: var(--card); border: 1px solid var(--border);
-    border-radius: 12px; padding: 24px; margin-bottom: 20px;
-  }
-
+  .card { background: var(--card); border: 1px solid var(--border); border-radius: 12px; padding: 24px; margin-bottom: 20px; }
   .card h2 { font-size: 1.2em; margin-bottom: 4px; color: var(--gold); }
   .card .subtitle { font-size: 0.85em; color: var(--muted); margin-bottom: 16px; }
 
-  /* Forms */
   label { display: block; font-size: 0.85em; color: var(--muted); margin-bottom: 4px; margin-top: 12px; }
-
-  input, select {
-    width: 100%; padding: 10px 14px; background: var(--bg);
-    border: 1px solid var(--border); border-radius: 8px;
-    color: var(--text); font-size: 0.95em; transition: border-color 0.2s;
-  }
-
+  input, select { width: 100%; padding: 10px 14px; background: var(--bg); border: 1px solid var(--border); border-radius: 8px; color: var(--text); font-size: 0.95em; transition: border-color 0.2s; }
   input:focus, select:focus { outline: none; border-color: var(--accent); }
   select option { background: var(--bg); color: var(--text); }
 
-  /* Drag list for rankings */
-  .rank-list { list-style: none; counter-reset: rank; }
-
-  .rank-item {
-    display: flex; align-items: center; gap: 12px;
-    padding: 12px 16px; background: var(--bg); border: 1px solid var(--border);
-    border-radius: 8px; margin-bottom: 8px; cursor: grab;
-    transition: all 0.2s; user-select: none;
-  }
-
+  .rank-list { list-style: none; position: relative; }
+  .rank-item { display: flex; align-items: center; gap: 12px; padding: 12px 16px; background: var(--bg); border: 1px solid var(--border); border-radius: 8px; margin-bottom: 8px; cursor: grab; transition: transform 0.2s, border-color 0.2s, background 0.2s, opacity 0.2s; user-select: none; position: relative; z-index: 1; }
   .rank-item:active { cursor: grabbing; }
   .rank-item.dragging { opacity: 0.4; border-color: var(--accent); }
   .rank-item.drag-over { border-color: var(--gold); transform: scale(1.02); }
-
-  .rank-number {
-    width: 32px; height: 32px; border-radius: 50%;
-    display: flex; align-items: center; justify-content: center;
-    font-weight: 700; font-size: 0.85em; flex-shrink: 0;
-  }
-
+  .rank-item.touch-dragging { position: fixed; z-index: 9999; pointer-events: none; box-shadow: 0 8px 32px rgba(0,0,0,0.5); border-color: var(--gold); background: var(--card); opacity: 0.95; width: calc(100% - 40px); max-width: 860px; }
+  .rank-item.touch-placeholder { opacity: 0.2; border-style: dashed; border-color: var(--gold); }
+  .rank-item.drop-target-above { border-top: 3px solid var(--gold); margin-top: -3px; }
+  .rank-item.drop-target-below { border-bottom: 3px solid var(--gold); margin-bottom: 5px; }
+  .rank-item .drag-handle { display: none; color: var(--muted); font-size: 1.1em; flex-shrink: 0; padding: 4px; }
+  @media (max-width: 600px) { .rank-item .drag-handle { display: flex; } }
+  .rank-number { width: 32px; height: 32px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-weight: 700; font-size: 0.85em; flex-shrink: 0; }
   .rank-number.r1 { background: var(--gold); color: #000; }
   .rank-number.r2 { background: var(--silver); color: #000; }
   .rank-number.r3 { background: var(--bronze); color: #fff; }
   .rank-number.rn { background: var(--accent2); color: var(--text); }
-
   .rank-team { font-weight: 600; flex: 1; }
-
   .rank-arrows { display: flex; flex-direction: column; gap: 2px; }
-
-  .rank-arrows button {
-    background: none; border: 1px solid var(--border); color: var(--muted);
-    width: 28px; height: 22px; border-radius: 4px; cursor: pointer;
-    font-size: 0.7em; display: flex; align-items: center; justify-content: center;
-    transition: all 0.15s;
-  }
-
+  .rank-arrows button { background: none; border: 1px solid var(--border); color: var(--muted); width: 28px; height: 22px; border-radius: 4px; cursor: pointer; font-size: 0.7em; display: flex; align-items: center; justify-content: center; transition: all 0.15s; }
   .rank-arrows button:hover { border-color: var(--accent); color: var(--accent); }
 
-  /* Player select rows */
-  .player-row { display: flex; align-items: center; gap: 12px; margin-bottom: 10px; }
+  .player-row { display: flex; align-items: center; gap: 12px; margin-bottom: 10px; position: relative; }
   .player-row .rank-number { flex-shrink: 0; }
   .player-row input { flex: 1; }
+  .ac-wrap { flex: 1; position: relative; }
+  .ac-wrap input { width: 100%; }
+  .ac-list { position: absolute; top: 100%; left: 0; right: 0; background: var(--card); border: 1px solid var(--border); border-top: none; border-radius: 0 0 8px 8px; max-height: 200px; overflow-y: auto; z-index: 500; display: none; }
+  .ac-list.show { display: block; }
+  .ac-item { padding: 8px 14px; cursor: pointer; font-size: 0.9em; display: flex; justify-content: space-between; align-items: center; }
+  .ac-item:hover, .ac-item.active { background: rgba(233,69,96,0.15); }
+  .ac-item .ac-team { font-size: 0.72em; color: var(--muted); }
+  .ac-mvp-wrap { position: relative; }
+  .ac-mvp-wrap .ac-list { border-radius: 0 0 8px 8px; }
 
-  /* Buttons */
-  .btn {
-    display: inline-flex; align-items: center; gap: 8px;
-    padding: 12px 24px; border: none; border-radius: 8px;
-    font-weight: 700; font-size: 0.95em; cursor: pointer; transition: all 0.2s;
-  }
-
+  .btn { display: inline-flex; align-items: center; gap: 8px; padding: 12px 24px; border: none; border-radius: 8px; font-weight: 700; font-size: 0.95em; cursor: pointer; transition: all 0.2s; }
   .btn-primary { background: var(--accent); color: #fff; }
   .btn-primary:hover { background: #d63a52; transform: translateY(-1px); }
   .btn-secondary { background: var(--accent2); color: #fff; }
@@ -196,133 +94,240 @@
   .btn-danger { background: #c0392b; color: #fff; }
   .btn-danger:hover { background: #a93226; }
   .btn:disabled { opacity: 0.5; cursor: not-allowed; transform: none; }
-
   .btn-group { display: flex; gap: 10px; margin-top: 20px; flex-wrap: wrap; }
 
-  /* Leaderboard */
   .leaderboard-table { width: 100%; border-collapse: collapse; }
-
-  .leaderboard-table th {
-    text-align: left; padding: 12px; font-size: 0.8em; color: var(--muted);
-    text-transform: uppercase; letter-spacing: 0.5px; border-bottom: 1px solid var(--border);
-  }
-
-  .leaderboard-table td {
-    padding: 12px; border-bottom: 1px solid var(--border); font-size: 0.95em;
-  }
-
+  .leaderboard-table th { text-align: left; padding: 12px; font-size: 0.8em; color: var(--muted); text-transform: uppercase; letter-spacing: 0.5px; border-bottom: 1px solid var(--border); }
+  .leaderboard-table td { padding: 12px; border-bottom: 1px solid var(--border); font-size: 0.95em; }
   .leaderboard-table tr:hover td { background: rgba(255,255,255,0.02); }
-
   .medal { font-size: 1.3em; }
-
-  .points-badge {
-    display: inline-block; background: var(--accent2);
-    padding: 4px 12px; border-radius: 20px; font-weight: 700; font-size: 0.85em;
-  }
-
+  .points-badge { display: inline-block; background: var(--accent2); padding: 4px 12px; border-radius: 20px; font-weight: 700; font-size: 0.85em; }
   .points-badge.gold { background: rgba(245,197,24,0.2); color: var(--gold); }
 
-  /* Scoring config */
   .scoring-grid { display: grid; grid-template-columns: 1fr auto; gap: 8px; align-items: center; }
   .scoring-grid label { margin: 0; }
   .scoring-grid input { width: 80px; text-align: center; }
 
-  /* Participants list */
-  .participant-chip {
-    display: inline-flex; align-items: center; gap: 6px;
-    background: var(--accent2); padding: 6px 14px; border-radius: 20px;
-    margin: 4px; font-size: 0.85em;
-  }
-
-  .participant-chip .remove {
-    cursor: pointer; opacity: 0.6; font-size: 1.1em;
-  }
-
+  .participant-chip { display: inline-flex; align-items: center; gap: 6px; background: var(--accent2); padding: 6px 14px; border-radius: 20px; margin: 4px; font-size: 0.85em; }
+  .participant-chip .remove { cursor: pointer; opacity: 0.6; font-size: 1.1em; }
   .participant-chip .remove:hover { opacity: 1; color: var(--accent); }
 
   .match { color: var(--green); }
   .no-match { color: var(--accent); }
 
-  .locked-banner {
-    background: rgba(46,204,113,0.1); border: 1px solid rgba(46,204,113,0.3);
-    border-radius: 8px; padding: 14px 18px; margin-bottom: 16px;
-    display: flex; align-items: center; gap: 10px; font-size: 0.9em;
-  }
+  .locked-banner { background: rgba(46,204,113,0.1); border: 1px solid rgba(46,204,113,0.3); border-radius: 8px; padding: 14px 18px; margin-bottom: 16px; display: flex; align-items: center; gap: 10px; font-size: 0.9em; }
   .locked-banner .icon { font-size: 1.4em; }
 
-  .info-banner {
-    background: rgba(245,197,24,0.1); border: 1px solid rgba(245,197,24,0.3);
-    border-radius: 8px; padding: 12px 16px; margin-bottom: 16px;
-    font-size: 0.9em; color: var(--gold);
-  }
+  .info-banner { background: rgba(245,197,24,0.1); border: 1px solid rgba(245,197,24,0.3); border-radius: 8px; padding: 12px 16px; margin-bottom: 16px; font-size: 0.9em; color: var(--gold); }
+  .error-banner { background: rgba(233,69,96,0.1); border: 1px solid rgba(233,69,96,0.3); border-radius: 8px; padding: 14px 18px; margin-bottom: 16px; font-size: 0.9em; color: var(--accent); display: flex; align-items: center; gap: 10px; }
 
-  .toast {
-    position: fixed; bottom: 24px; left: 50%;
-    transform: translateX(-50%) translateY(100px);
-    background: var(--green); color: #fff;
-    padding: 12px 24px; border-radius: 8px; font-weight: 600;
-    z-index: 1000; transition: transform 0.3s;
-  }
+  .toast { position: fixed; bottom: 24px; left: 50%; transform: translateX(-50%) translateY(100px); background: var(--green); color: #fff; padding: 12px 24px; border-radius: 8px; font-weight: 600; z-index: 1000; transition: transform 0.3s; }
   .toast.error { background: var(--accent); }
   .toast.show { transform: translateX(-50%) translateY(0); }
 
-  .export-box {
-    background: var(--bg); border: 1px solid var(--border); border-radius: 8px;
-    padding: 16px; font-family: monospace; font-size: 0.85em;
-    white-space: pre-wrap; word-break: break-all; max-height: 200px;
-    overflow-y: auto; margin-top: 12px;
-  }
-
+  .export-box { background: var(--bg); border: 1px solid var(--border); border-radius: 8px; padding: 16px; font-family: monospace; font-size: 0.85em; white-space: pre-wrap; word-break: break-all; max-height: 200px; overflow-y: auto; margin-top: 12px; }
   .compare-table { width: 100%; border-collapse: collapse; margin-top: 12px; }
-  .compare-table th, .compare-table td {
-    padding: 8px 12px; text-align: left; border-bottom: 1px solid var(--border); font-size: 0.9em;
-  }
+  .compare-table th, .compare-table td { padding: 8px 12px; text-align: left; border-bottom: 1px solid var(--border); font-size: 0.9em; }
   .compare-table th { color: var(--muted); font-size: 0.8em; text-transform: uppercase; }
-
-  .expand-btn {
-    background: none; border: none; color: var(--accent); cursor: pointer;
-    font-size: 0.85em; padding: 4px 0; text-decoration: underline;
-  }
-
-  .hidden { display: none; }
+  .expand-btn { background: none; border: none; color: var(--accent); cursor: pointer; font-size: 0.85em; padding: 4px 0; text-decoration: underline; }
+  .hidden { display: none !important; }
+  .user-lock-banner { display: flex; align-items: center; gap: 12px; background: #2a1a1a; border: 1px solid var(--accent); border-radius: 10px; padding: 14px 18px; margin-bottom: 16px; }
 
   .stat-row { display: flex; gap: 16px; margin-bottom: 20px; flex-wrap: wrap; }
-  .stat-card {
-    background: var(--card); border: 1px solid var(--border); border-radius: 10px;
-    padding: 16px 20px; flex: 1; min-width: 140px; text-align: center;
-  }
+  .stat-card { background: var(--card); border: 1px solid var(--border); border-radius: 10px; padding: 16px 20px; flex: 1; min-width: 140px; text-align: center; }
   .stat-card .num { font-size: 1.8em; font-weight: 800; color: var(--gold); }
   .stat-card .label { font-size: 0.8em; color: var(--muted); margin-top: 2px; }
 
+  .group-overlay { position: fixed; inset: 0; background: var(--bg); display: flex; align-items: center; justify-content: center; z-index: 10000; padding: 24px; }
+  .group-overlay.hidden { display: none; }
+  .group-box { background: var(--card); border: 1px solid var(--border); border-radius: 16px; padding: 32px; max-width: 460px; width: 100%; text-align: center; }
+  .group-box h2 { color: var(--gold); margin-bottom: 6px; font-size: 1.5em; }
+  .group-box p { color: var(--muted); font-size: 0.9em; margin-bottom: 20px; }
+  .group-box .or-divider { display: flex; align-items: center; gap: 12px; margin: 20px 0; color: var(--muted); font-size: 0.85em; }
+  .group-box .or-divider::before, .group-box .or-divider::after { content: ''; flex: 1; height: 1px; background: var(--border); }
+  .group-badge { display: inline-flex; align-items: center; gap: 8px; background: var(--accent2); padding: 6px 14px; border-radius: 20px; font-size: 0.85em; font-weight: 600; cursor: pointer; transition: all 0.2s; }
+  .group-badge:hover { background: var(--accent); }
+  .group-badge .switch-icon { font-size: 0.8em; opacity: 0.7; }
+
+  /* Password modal */
+  .modal-overlay { position: fixed; inset: 0; background: rgba(0,0,0,0.7); display: flex; align-items: center; justify-content: center; z-index: 10001; padding: 24px; }
+  .modal-overlay.hidden { display: none; }
+  .modal-box { background: var(--card); border: 1px solid var(--border); border-radius: 16px; padding: 28px; max-width: 400px; width: 100%; text-align: center; }
+  .modal-box h3 { color: var(--gold); margin-bottom: 8px; }
+  .modal-box p { color: var(--muted); font-size: 0.85em; margin-bottom: 16px; }
+
+  /* Deadline countdown */
+  .deadline-bar { background: var(--secondary); border: 1px solid var(--border); border-radius: 8px; padding: 12px 16px; margin-bottom: 16px; display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 8px; }
+  .deadline-bar .countdown { font-weight: 700; font-size: 1em; }
+  .deadline-bar .countdown.expired { color: var(--accent); }
+  .deadline-bar .countdown.active { color: var(--green); }
+  .deadline-bar .dl-label { font-size: 0.85em; color: var(--muted); }
+
+  /* Admin lock toggle */
+  .toggle-container { display: flex; align-items: center; gap: 12px; }
+  .toggle { width: 50px; height: 26px; background: var(--border); border-radius: 13px; position: relative; cursor: pointer; transition: background 0.3s; }
+  .toggle.on { background: var(--green); }
+  .toggle .knob { width: 22px; height: 22px; background: #fff; border-radius: 50%; position: absolute; top: 2px; left: 2px; transition: left 0.3s; }
+  .toggle.on .knob { left: 26px; }
+
+  /* Participant table */
+  .ptable { width: 100%; border-collapse: collapse; }
+  .ptable th { text-align: left; padding: 10px 8px; font-size: 0.8em; color: var(--muted); text-transform: uppercase; border-bottom: 1px solid var(--border); }
+  .ptable td { padding: 10px 8px; border-bottom: 1px solid var(--border); font-size: 0.9em; vertical-align: middle; }
+  .ptable tr:hover > td { background: rgba(255,255,255,0.02); }
+
+  .status-pill { display: inline-block; padding: 3px 10px; border-radius: 12px; font-size: 0.8em; font-weight: 600; }
+  .status-pill.submitted { background: rgba(46,204,113,0.15); color: var(--green); }
+  .status-pill.pending { background: rgba(136,136,136,0.15); color: var(--muted); }
+  .status-pill.locked { background: rgba(233,69,96,0.15); color: var(--accent); }
+
+  .lock-btn { padding: 4px 12px; border: 1px solid var(--border); border-radius: 6px; background: var(--bg); color: var(--muted); font-size: 0.8em; cursor: pointer; transition: all 0.2s; }
+  .lock-btn:hover { border-color: var(--accent); color: var(--accent); }
+  .lock-btn.is-locked { background: rgba(233,69,96,0.15); border-color: var(--accent); color: var(--accent); }
+
+  .view-btn { padding: 4px 12px; border: none; border-radius: 6px; background: var(--accent2); color: var(--text); font-size: 0.8em; cursor: pointer; transition: all 0.2s; }
+  .view-btn:hover { background: var(--accent); }
+  .view-btn:disabled { opacity: 0.4; cursor: not-allowed; }
+
+  .pred-expand { background: var(--bg); border: 1px solid var(--border); border-radius: 8px; padding: 16px; margin: 8px 0 12px 0; }
+  .pred-expand h4 { font-size: 0.85em; color: var(--gold); margin: 12px 0 6px 0; }
+  .pred-expand h4:first-child { margin-top: 0; }
+  .pred-expand .pred-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 6px; }
+  .pred-expand .pred-item { background: var(--card); padding: 6px 10px; border-radius: 6px; font-size: 0.85em; }
+  .pred-expand .pred-item .lbl { color: var(--muted); font-size: 0.8em; }
+  .pred-expand .pred-rank-list { list-style: none; }
+  .pred-expand .pred-rank-list li { display: flex; align-items: center; gap: 8px; padding: 4px 0; font-size: 0.85em; }
+  .pred-expand .pred-rank-list li .rnum { width: 24px; height: 24px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-weight: 700; font-size: 0.75em; flex-shrink: 0; }
+
+  /* Export grid */
+  .export-grid { width: 100%; border-collapse: collapse; font-size: 0.78em; }
+  .export-grid th { background: var(--accent2); color: var(--text); padding: 8px 10px; text-align: left; white-space: nowrap; position: sticky; top: 0; z-index: 1; }
+  .export-grid td { padding: 6px 10px; border-bottom: 1px solid var(--border); white-space: nowrap; }
+  .export-grid tr:nth-child(even) td { background: rgba(255,255,255,0.02); }
+  .export-grid tr:hover td { background: rgba(233,69,96,0.08); }
+  .export-grid .row-label { font-weight: 600; color: var(--gold); background: var(--secondary); position: sticky; left: 0; z-index: 1; }
+
+  /* Consensus */
+  .cons-category { margin-bottom: 18px; }
+  .cons-category h4 { font-size: 0.88em; color: var(--gold); margin-bottom: 8px; }
+  .cons-item { display: flex; align-items: center; gap: 10px; margin-bottom: 4px; font-size: 0.84em; }
+  .cons-item .cons-label { min-width: 140px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+  .cons-item .cons-bar-bg { flex: 1; height: 20px; background: var(--secondary); border-radius: 4px; overflow: hidden; position: relative; }
+  .cons-item .cons-bar { height: 100%; border-radius: 4px; transition: width 0.4s ease; display: flex; align-items: center; padding-left: 6px; font-size: 0.75em; font-weight: 700; color: #fff; }
+  .cons-item .cons-count { min-width: 50px; text-align: right; font-size: 0.78em; color: var(--muted); }
+  .cons-bar.bar-1 { background: linear-gradient(90deg, var(--accent), #c0392b); }
+  .cons-bar.bar-2 { background: linear-gradient(90deg, var(--accent2), #2980b9); }
+  .cons-bar.bar-3 { background: linear-gradient(90deg, #27ae60, #2ecc71); }
+  .cons-bar.bar-4 { background: linear-gradient(90deg, #8e44ad, #9b59b6); }
+  .cons-bar.bar-5 { background: linear-gradient(90deg, #d35400, #e67e22); }
 
   @media (max-width: 600px) {
     .header h1 { font-size: 1.5em; }
-    .tab { padding: 12px 16px; font-size: 0.8em; }
-    .container { padding: 16px 12px; }
-    .card { padding: 16px; }
+    .header { padding: 16px 12px; }
+    .tab { padding: 12px 14px; font-size: 0.78em; }
+    .container { padding: 12px 8px; }
+    .card { padding: 14px; margin-bottom: 14px; }
+
+    /* Rank list mobile — bigger touch targets */
+    .rank-item { padding: 10px 10px; gap: 8px; }
+    .rank-team { font-size: 0.85em; }
+    .rank-arrows button { width: 34px; height: 28px; font-size: 0.8em; }
+    .rank-number { width: 28px; height: 28px; font-size: 0.78em; }
+
+    /* Buttons — full width on mobile */
+    .btn-group { display: flex; flex-direction: column; gap: 8px; }
+    .btn-group .btn { width: 100%; justify-content: center; }
+
+    /* Participant table — card layout on mobile */
+    .ptable thead { display: none; }
+    .ptable, .ptable tbody, .ptable tr, .ptable td { display: block; width: 100%; }
+    .ptable tr { background: var(--bg); border: 1px solid var(--border); border-radius: 8px; padding: 12px; margin-bottom: 10px; position: relative; }
+    .ptable tr:hover > td { background: none; }
+    .ptable td { border: none; padding: 3px 0; font-size: 0.85em; }
+    .ptable td:first-child { font-size: 1em; margin-bottom: 4px; }
+    .ptable td:last-child { position: absolute; top: 12px; right: 12px; }
+
+    /* Stat row */
+    .stat-row { gap: 8px; }
+    .stat-card { padding: 12px 8px; }
+    .stat-card .num { font-size: 1.3em; }
+
+    /* Consensus bars */
+    .cons-item { flex-wrap: wrap; }
+    .cons-item .cons-label { min-width: 100px; font-size: 0.8em; }
+
+    /* Export grid scroll hint */
+    .export-grid { font-size: 0.72em; }
+
+    /* Player input rows */
+    .player-row { gap: 8px; }
+    .player-row input { font-size: 0.85em; }
+
+    /* Modal */
+    .modal-box { width: 90%; padding: 20px; }
+
+    /* Deadline bar */
+    .deadline-bar { flex-direction: column; align-items: flex-start; gap: 6px; font-size: 0.85em; }
   }
 </style>
 </head>
 <body>
 
-<!-- Loading -->
 <div class="loading-overlay" id="loadingOverlay">
   <div class="spinner"></div>
   <p style="color:var(--muted);">Connecting to database...</p>
 </div>
 
-<!-- Firebase config is embedded -->
+<!-- Group Selection -->
+<div class="group-overlay" id="groupOverlay">
+  <div class="group-box">
+    <h2>Welcome!</h2>
+    <p>Create a new group for your GC, or join an existing one.</p>
+    <label style="text-align:left;">Create a new group</label>
+    <div style="display:flex; gap:10px; margin-top:4px;">
+      <input type="text" id="newGroupName" placeholder="e.g. Cricket GC, Office Boys..." style="flex:1">
+      <button class="btn btn-primary btn-small" onclick="createGroup()">Create</button>
+    </div>
+    <label style="text-align:left; margin-top:8px;">Set admin password for your group</label>
+    <input type="password" id="newGroupPassword" placeholder="Password for editing/submitting...">
+    <div class="or-divider">or</div>
+    <label style="text-align:left;">Join an existing group</label>
+    <div style="display:flex; gap:10px; margin-top:4px;">
+      <input type="text" id="joinGroupCode" placeholder="Paste group code..." style="flex:1" onkeydown="if(event.key==='Enter')joinGroup()">
+      <button class="btn btn-secondary btn-small" onclick="joinGroup()">Join</button>
+    </div>
+    <div id="recentGroups" style="margin-top:20px;"></div>
+  </div>
+</div>
 
-<!-- Connection status bar -->
+<!-- Password Modal -->
+<div class="modal-overlay hidden" id="passwordModal">
+  <div class="modal-box">
+    <h3 id="pwModalTitle">Enter Password</h3>
+    <p id="pwModalDesc">Enter the group password to make changes.</p>
+    <input type="password" id="pwModalInput" placeholder="Password..." onkeydown="if(event.key==='Enter')confirmPassword()">
+    <div class="btn-group" style="justify-content:center;">
+      <button class="btn btn-primary btn-small" onclick="confirmPassword()">Confirm</button>
+      <button class="btn btn-secondary btn-small" onclick="cancelPassword()">Cancel</button>
+    </div>
+  </div>
+</div>
+
 <div class="conn-status online" id="connStatus">You are offline. Changes will sync when reconnected.</div>
 
 <div class="header">
   <h1>IPL 2026 Prediction Contest <span class="live-badge">LIVE</span></h1>
   <p>Predict. Compete. Bragging rights forever.</p>
+  <div style="margin-top:8px; position:relative;">
+    <span class="group-badge" onclick="showGroupOverlay()" id="groupBadgeHeader">
+      <span id="groupNameDisplay">Loading...</span>
+      <span class="switch-icon">&#9998; Switch</span>
+    </span>
+  </div>
   <p style="font-size:0.8em; color:var(--muted); margin-top:4px;" id="participantCount"></p>
 </div>
 
-<div class="tabs" id="tabs">
+<div class="tabs">
   <div class="tab active" data-tab="predictions">My Prediction</div>
   <div class="tab" data-tab="participants">Participants</div>
   <div class="tab" data-tab="admin">Admin / Results</div>
@@ -334,27 +339,42 @@
 
   <!-- PREDICTIONS TAB -->
   <div class="section active" id="sec-predictions">
+    <div id="deadlineBar" class="deadline-bar">
+      <div>
+        <span class="dl-label">Predictions lock:</span>
+        <span id="deadlineText" style="font-weight:600;"></span>
+      </div>
+      <div class="countdown active" id="countdownText"></div>
+    </div>
+
+    <div id="predLockedBanner" class="error-banner hidden">
+      <span style="font-size:1.3em;">&#128274;</span>
+      <div><strong>Predictions are locked!</strong> The deadline has passed. Only the admin can reopen predictions.</div>
+    </div>
 
     <div class="info-banner" id="predInfoBanner">
-      Fill in your predictions below, then hit "Submit Prediction" at the bottom. Select your name from the dropdown (add names in the Participants tab first).
+      Fill in your predictions below, then hit "Submit Prediction." You'll need the group password to submit.
     </div>
 
     <div id="lockedBanner" class="locked-banner hidden">
       <span class="icon">&#9989;</span>
-      <div><strong>Prediction submitted!</strong> Your picks are locked in and visible to others on the Leaderboard once results are entered.</div>
+      <div><strong>Prediction submitted!</strong> Your picks are locked in.</div>
+    </div>
+
+    <div id="userLockedBanner" class="user-lock-banner hidden">
+      <span style="font-size:1.3em;">&#128274;</span>
+      <div><strong>Your prediction is locked!</strong> Ask the admin to unlock it if you need to make changes.</div>
     </div>
 
     <div class="card">
       <h2>Who are you?</h2>
       <p class="subtitle">Select your name to load or submit your prediction</p>
-      <select id="currentPlayer">
-        <option value="">-- Select your name --</option>
-      </select>
+      <select id="currentPlayer"><option value="">-- Select your name --</option></select>
     </div>
 
     <div class="card">
       <h2>Team Rankings (Points Table)</h2>
-      <p class="subtitle">Drag teams or use arrows to set your predicted final standings (1 = top of table)</p>
+      <p class="subtitle">Drag teams or use arrows to reorder (1 = top of table). On mobile, hold and drag a team to move it.</p>
       <ul class="rank-list" id="teamRankList"></ul>
     </div>
 
@@ -383,43 +403,111 @@
       <h2>MVP (Most Valuable Player)</h2>
       <p class="subtitle">Who will be the player of the tournament?</p>
       <label>MVP Pick</label>
-      <input type="text" id="predMVP" placeholder="e.g. Virat Kohli">
+      <div class="ac-mvp-wrap">
+        <input type="text" id="predMVP" placeholder="Start typing player name..." autocomplete="off">
+        <div class="ac-list" id="predMVP_ac"></div>
+      </div>
     </div>
 
     <div class="btn-group">
       <button class="btn btn-primary" id="submitBtn" onclick="submitPrediction()">Submit Prediction</button>
       <button class="btn btn-secondary" onclick="clearForm()">Clear Form</button>
+      <button class="btn btn-secondary" id="lockMyPredBtn" onclick="lockMyPrediction()" style="display:none; background:var(--accent2); border-color:var(--accent2);">&#128274; Lock My Prediction</button>
     </div>
   </div>
 
   <!-- PARTICIPANTS TAB -->
   <div class="section" id="sec-participants">
     <div class="card">
+      <h2>Share This Group</h2>
+      <p class="subtitle">Share the link so others can join directly</p>
+      <div style="display:flex; gap:10px; align-items:center; margin-top:8px;">
+        <input type="text" id="shareGroupLink" readonly style="flex:1; font-family:monospace; font-size:0.8em; letter-spacing:0.5px;">
+        <button class="btn btn-primary btn-small" onclick="copyGroupLink()">Copy Link</button>
+      </div>
+      <div style="display:flex; gap:10px; margin-top:10px; flex-wrap:wrap;">
+        <button class="btn btn-small" onclick="shareWhatsApp()" style="background:#25D366; border-color:#25D366; color:#fff; flex:1; min-width:120px;">&#128172; WhatsApp</button>
+        <button class="btn btn-small" id="nativeShareBtn" onclick="nativeShare()" style="background:var(--accent2); border-color:var(--accent2); flex:1; min-width:120px; display:none;">&#128228; Share...</button>
+      </div>
+      <p style="font-size:0.75em; color:var(--muted); margin-top:8px;">Group code: <span id="shareGroupCode" style="font-family:monospace; font-weight:700;"></span></p>
+    </div>
+
+    <div class="card">
       <h2>Manage Participants</h2>
-      <p class="subtitle">Add everyone from the GC who's playing</p>
+      <div style="display:flex; justify-content:space-between; align-items:center;">
+        <p class="subtitle" id="addParticipantSubtitle">Anyone can add participants</p>
+        <button class="btn btn-small" id="toggleAddLockBtn" onclick="toggleAddParticipantLock()" style="font-size:0.75em; padding:4px 10px;">&#128274; Lock Adding</button>
+      </div>
       <div style="display:flex; gap:10px; margin-top:12px;">
         <input type="text" id="newParticipant" placeholder="Enter name..." style="flex:1" onkeydown="if(event.key==='Enter')addParticipant()">
         <button class="btn btn-primary btn-small" onclick="addParticipant()">Add</button>
+      </div>
+      <div style="margin-top:12px;">
+        <input type="text" id="bulkParticipants" placeholder="Bulk add: Rahul, Virat, Rohit, ..." style="flex:1" onkeydown="if(event.key==='Enter')bulkAddParticipants()">
+        <button class="btn btn-secondary btn-small" onclick="bulkAddParticipants()" style="margin-top:8px;">Bulk Add</button>
       </div>
       <div id="participantChips" style="margin-top:16px;"></div>
     </div>
 
     <div class="card">
-      <h2>Submission Status</h2>
-      <p class="subtitle">Track who has locked in their picks</p>
-      <div class="stat-row" id="statsRow">
+      <h2>All Participants & Predictions</h2>
+      <p class="subtitle">View predictions, lock status, and manage participants</p>
+      <div class="stat-row">
         <div class="stat-card"><div class="num" id="statTotal">0</div><div class="label">Participants</div></div>
         <div class="stat-card"><div class="num" id="statSubmitted">0</div><div class="label">Submitted</div></div>
         <div class="stat-card"><div class="num" id="statPending">0</div><div class="label">Pending</div></div>
       </div>
-      <div id="submittedList"></div>
+      <div id="participantsTable"></div>
+    </div>
+
+    <div class="card">
+      <h2>Group Consensus</h2>
+      <p class="subtitle">See where the group agrees and the most popular picks</p>
+      <div id="consensusContent"><p style="color:var(--muted);">Need at least 2 predictions to show consensus.</p></div>
+    </div>
+
+    <div class="card">
+      <h2>Export All Predictions</h2>
+      <p class="subtitle">View everyone's predictions in one table or download as CSV</p>
+      <div style="display:flex; gap:10px; margin-top:12px; flex-wrap:wrap;">
+        <button class="btn btn-primary btn-small" onclick="showAllPredictionsGrid()">View All</button>
+        <button class="btn btn-secondary btn-small" onclick="downloadPredictionsCSV()">Download CSV</button>
+      </div>
+      <div id="allPredictionsGrid" style="margin-top:16px; overflow-x:auto;"></div>
     </div>
   </div>
 
   <!-- ADMIN TAB -->
   <div class="section" id="sec-admin">
     <div class="info-banner">
-      Enter the actual IPL 2026 results here once the tournament is over. This will calculate everyone's scores automatically.
+      Admin-only section. All changes require the group password.
+    </div>
+
+    <!-- Admin Controls -->
+    <div class="card">
+      <h2>Admin Controls</h2>
+      <p class="subtitle">Manage prediction lock and deadline</p>
+
+      <div style="margin-top:12px;">
+        <label style="margin-top:0;">Prediction Deadline</label>
+        <div style="display:flex; gap:10px; align-items:center;">
+          <input type="datetime-local" id="adminDeadline" style="flex:1;">
+          <button class="btn btn-secondary btn-small" onclick="requirePassword('saveDeadline')">Save</button>
+        </div>
+      </div>
+
+      <div style="margin-top:20px; display:flex; justify-content:space-between; align-items:center;">
+        <div>
+          <strong>Override Toggle</strong>
+          <p style="font-size:0.8em; color:var(--muted);">Before deadline: locks early. After deadline: reopens predictions.</p>
+        </div>
+        <div class="toggle-container">
+          <span style="font-size:0.85em; color:var(--muted);" id="lockLabel">Unlocked</span>
+          <div class="toggle" id="lockToggle" onclick="requirePassword('toggleLock')">
+            <div class="knob"></div>
+          </div>
+        </div>
+      </div>
     </div>
 
     <div class="card">
@@ -449,12 +537,15 @@
     <div class="card">
       <h2>Actual MVP</h2>
       <label>MVP</label>
-      <input type="text" id="actualMVP" placeholder="e.g. Jasprit Bumrah">
+      <div class="ac-mvp-wrap">
+        <input type="text" id="actualMVP" placeholder="Start typing player name..." autocomplete="off">
+        <div class="ac-list" id="actualMVP_ac"></div>
+      </div>
     </div>
 
     <div class="btn-group">
-      <button class="btn btn-gold" onclick="saveActualResults()">Save Actual Results</button>
-      <button class="btn btn-primary" onclick="calculateScores()">Calculate All Scores</button>
+      <button class="btn btn-gold" onclick="requirePassword('saveActualResults')">Save Actual Results</button>
+      <button class="btn btn-primary" onclick="requirePassword('calculateScores')">Calculate All Scores</button>
     </div>
   </div>
 
@@ -462,54 +553,37 @@
   <div class="section" id="sec-scoring">
     <div class="card">
       <h2>Scoring Configuration</h2>
-      <p class="subtitle">Customize how points are awarded. Changes apply to all calculations.</p>
-
+      <p class="subtitle">Customize points. Changes require password.</p>
       <h3 style="margin-top:20px; font-size:0.95em; color:var(--accent);">Team Rankings (Points Table)</h3>
       <div class="scoring-grid" style="margin-top:8px;">
-        <label>Exact position match</label>
-        <input type="number" id="sc_rankExact" value="10" min="0">
-        <label>Off by 1 position</label>
-        <input type="number" id="sc_rankOff1" value="5" min="0">
-        <label>Off by 2 positions</label>
-        <input type="number" id="sc_rankOff2" value="2" min="0">
+        <label>Exact position match</label><input type="number" id="sc_rankExact" value="10" min="0">
+        <label>Off by 1 position</label><input type="number" id="sc_rankOff1" value="5" min="0">
+        <label>Off by 2 positions</label><input type="number" id="sc_rankOff2" value="2" min="0">
       </div>
-
       <h3 style="margin-top:24px; font-size:0.95em; color:var(--accent);">Winner & Runner-up</h3>
       <div class="scoring-grid" style="margin-top:8px;">
-        <label>Correct Winner</label>
-        <input type="number" id="sc_winner" value="25" min="0">
-        <label>Correct Runner-up</label>
-        <input type="number" id="sc_runnerUp" value="15" min="0">
+        <label>Correct Winner</label><input type="number" id="sc_winner" value="25" min="0">
+        <label>Correct Runner-up</label><input type="number" id="sc_runnerUp" value="15" min="0">
       </div>
-
       <h3 style="margin-top:24px; font-size:0.95em; color:var(--accent);">Top 5 Run Scorers</h3>
       <div class="scoring-grid" style="margin-top:8px;">
-        <label>Correct player in exact position</label>
-        <input type="number" id="sc_runsExact" value="15" min="0">
-        <label>Correct player but wrong position</label>
-        <input type="number" id="sc_runsPartial" value="5" min="0">
+        <label>Correct player in exact position</label><input type="number" id="sc_runsExact" value="15" min="0">
+        <label>Correct player but wrong position</label><input type="number" id="sc_runsPartial" value="5" min="0">
       </div>
-
       <h3 style="margin-top:24px; font-size:0.95em; color:var(--accent);">Top 5 Wicket Takers</h3>
       <div class="scoring-grid" style="margin-top:8px;">
-        <label>Correct player in exact position</label>
-        <input type="number" id="sc_wicketsExact" value="15" min="0">
-        <label>Correct player but wrong position</label>
-        <input type="number" id="sc_wicketsPartial" value="5" min="0">
+        <label>Correct player in exact position</label><input type="number" id="sc_wicketsExact" value="15" min="0">
+        <label>Correct player but wrong position</label><input type="number" id="sc_wicketsPartial" value="5" min="0">
       </div>
-
       <h3 style="margin-top:24px; font-size:0.95em; color:var(--accent);">MVP</h3>
       <div class="scoring-grid" style="margin-top:8px;">
-        <label>Correct MVP pick</label>
-        <input type="number" id="sc_mvp" value="30" min="0">
+        <label>Correct MVP pick</label><input type="number" id="sc_mvp" value="30" min="0">
       </div>
-
       <div class="btn-group">
-        <button class="btn btn-primary" onclick="saveScoring()">Save Scoring Rules</button>
-        <button class="btn btn-secondary" onclick="resetScoring()">Reset to Defaults</button>
+        <button class="btn btn-primary" onclick="requirePassword('saveScoring')">Save Scoring Rules</button>
+        <button class="btn btn-secondary" onclick="requirePassword('resetScoring')">Reset to Defaults</button>
       </div>
     </div>
-
     <div class="card">
       <h2>Max Possible Points</h2>
       <p class="subtitle" id="maxPointsDisplay">Calculating...</p>
@@ -521,61 +595,61 @@
     <div class="card">
       <h2>Leaderboard</h2>
       <p class="subtitle">Rankings update in real-time for everyone</p>
-      <div id="leaderboardContent">
-        <p style="color:var(--muted); padding:20px 0;">No scores calculated yet. Enter actual results in the Admin tab and hit "Calculate All Scores".</p>
-      </div>
+      <div id="leaderboardContent"><p style="color:var(--muted); padding:20px 0;">No scores calculated yet.</p></div>
     </div>
-
     <div class="card">
       <h2>Detailed Breakdown</h2>
-      <p class="subtitle">Click on a participant to see their prediction vs actual results</p>
-      <div id="breakdownContent">
-        <p style="color:var(--muted);">Calculate scores first to see breakdowns.</p>
-      </div>
+      <p class="subtitle">Click on a participant to see prediction vs actual</p>
+      <div id="breakdownContent"><p style="color:var(--muted);">Calculate scores first.</p></div>
     </div>
-
     <div class="card">
       <h2>Export / Share</h2>
-      <p class="subtitle">Copy the leaderboard to share in your GC</p>
+      <p class="subtitle">Copy leaderboard to share in your GC</p>
       <button class="btn btn-secondary btn-small" onclick="exportLeaderboard()">Copy to Clipboard</button>
       <div class="export-box hidden" id="exportBox"></div>
     </div>
   </div>
-
 </div>
 
 <div class="toast" id="toast"></div>
 
-<!-- Firebase SDK -->
 <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-database-compat.js"></script>
 
 <script>
-// =================== CONFIG ===================
-const TEAMS = [
-  "Chennai Super Kings", "Mumbai Indians", "Royal Challengers Bengaluru",
-  "Kolkata Knight Riders", "Delhi Capitals", "Rajasthan Royals",
-  "Punjab Kings", "SunRisers Hyderabad", "Gujarat Titans", "Lucknow Super Giants"
-];
+const TEAMS = ["Chennai Super Kings","Mumbai Indians","Royal Challengers Bengaluru","Kolkata Knight Riders","Delhi Capitals","Rajasthan Royals","Punjab Kings","SunRisers Hyderabad","Gujarat Titans","Lucknow Super Giants"];
 
-const DEFAULT_SCORING = {
-  rankExact: 10, rankOff1: 5, rankOff2: 2,
-  winner: 25, runnerUp: 15,
-  runsExact: 15, runsPartial: 5,
-  wicketsExact: 15, wicketsPartial: 5,
-  mvp: 30
+const IPL_PLAYERS = {
+  "Chennai Super Kings": ["Ruturaj Gaikwad","MS Dhoni","Sanju Samson","Shivam Dube","Noor Ahmad","Rahul Chahar","Dewald Brevis","Khaleel Ahmed","Ayush Mhatre","Ramakrishna Ghosh","Mukesh Choudhary","Urvil Patel","Anshul Kamboj","Shreyas Gopal","Spencer Johnson","Jamie Overton","Prashant Veer","Kartik Sharma","Matthew Short","Sarfaraz Khan","Zakary Foulkes","Matt Henry","Akeal Hosein","Gurjapneet Singh"],
+  "Mumbai Indians": ["Hardik Pandya","Rohit Sharma","Suryakumar Yadav","Tilak Varma","Ryan Rickelton","Jasprit Bumrah","Trent Boult","Corbin Bosch","Naman Dhir","Will Jacks","Robin Minz","Raj Bawa","Raghu Sharma","Mitchell Santner","AM Ghazanfar","Ashwani Kumar","Deepak Chahar","Shardul Thakur","Sherfane Rutherford","Mayank Markande","Quinton de Kock","Danish Malewar","Mohammed Salahuddin Izhar","Atharva Ankolekar","Mayank Rawat"],
+  "Royal Challengers Bengaluru": ["Virat Kohli","Philip Salt","Rajat Patidar","Devdutt Padikkal","Jitesh Sharma","Krunal Pandya","Venkatesh Iyer","Josh Hazlewood","Nuwan Thushara","Suyash Sharma","Abhinandan Singh","Rasikh Salam Dar","Swapnil Singh","Tim David","Jacob Bethell","Romario Shepherd","Jacob Duffy","Mangesh Yadav","Satvik Deswal","Vicky Ostwal","Vihaan Malhotra","Kanishk Chouhan","Jordan Cox","Bhuvneshwar Kumar"],
+  "Kolkata Knight Riders": ["Ajinkya Rahane","Rinku Singh","Angkrish Raghuvanshi","Manish Pandey","Rovman Powell","Sunil Narine","Ramandeep Singh","Anukul Roy","Varun Chakaravarthy","Vaibhav Arora","Umran Malik","Cameron Green","Finn Allen","Matheesha Pathirana","Rachin Ravindra","Tejasvi Dahiya","Kartik Tyagi","Prashant Solanki","Daksh Kamra","Sarthak Ranjan","Rahul Tripathi","Tim Seifert","Blessing Muzarabani","Saurabh R Dubey"],
+  "Delhi Capitals": ["Axar Patel","KL Rahul","Abishek Porel","Tristan Stubbs","Karun Nair","Sameer Rizvi","Ashutosh Sharma","Vipraj Nigam","Madhav Tiwari","Tripurana Vijay","Ajay Jadav Mandal","Kuldeep Yadav","Mitchell Starc","T Natarajan","Mukesh Kumar","Dushmantha Chameera","Nitish Rana","David Miller","Auqib Nabi Dar","Pathum Nissanka","Lungi Ngidi","Sahil Parakh","Prithvi Shaw","Kyle Jamieson"],
+  "Rajasthan Royals": ["Riyan Parag","Yashasvi Jaiswal","Vaibhav Sooryavanshi","Shimron Hetmyer","Shubham Dubey","Aman Rao Perala","Lhuan-dre Pretorius","Ravi Singh","Dhruv Jurel","Donovan Ferreira","Ravindra Jadeja","Dasun Shanaka","Ravi Bishnoi","Adam Milne","Kuldeep Sen","Sushant Mishra","Yash Raj Punja","Vignesh Puthur","Brijesh Sharma","Yudhvir Singh Charak","Jofra Archer","Kwena Maphaka","Nandre Burger","Tushar Deshpande","Sandeep Sharma"],
+  "Punjab Kings": ["Shreyas Iyer","Nehal Wadhera","Priyansh Arya","Pyla Avinash","Musheer Khan","Harnoor Singh","Prabhsimran Singh","Vishnu Vinod","Marcus Stoinis","Marco Jansen","Shashank Singh","Azmatullah Omarzai","Harpreet Brar","Suryansh Shedge","Mitchell Owen","Arshdeep Singh","Yuzvendra Chahal","Lockie Ferguson","Vijaykumar Vyshak","Yash Thakur","Xavier Bartlett","Ben Dwarshuis","Cooper Connolly","Praveen Dubey","Vishal Nishad"],
+  "SunRisers Hyderabad": ["Pat Cummins","Travis Head","Abhishek Sharma","Aniket Verma","Ishan Kishan","Heinrich Klaasen","Nitish Kumar Reddy","Harshal Patel","Brydon Carse","Jaydev Unadkat","Kamindu Mendis","Harsh Dubey","Eshan Malinga","Zeeshan Ansari","Shivang Kumar","Salil Arora","Sakib Hussain","Onkar Tukaram Tarmale","Amit Kumar","Praful Hinge","Krains Fuletra","Liam Livingstone","Shivam Mavi","David Payne","Smaran Ravichandran"],
+  "Gujarat Titans": ["Shubman Gill","Sai Sudharsan","Jos Buttler","Rashid Khan","Kagiso Rabada","Glenn Phillips","Mohammed Siraj","Washington Sundar","Prasidh Krishna","Ravisrinivasan Sai Kishore","M Shahrukh Khan","Rahul Tewatia","Ishant Sharma","Jayant Yadav","Manav Suthar","Kumar Kushagra","Anuj Rawat","Gurnoor Brar","Arshad Khan","Nishant Sindhu","Jason Holder","Tom Banton","Ashok Sharma","Luke Wood","Prithvi Raj Yarra"],
+  "Lucknow Super Giants": ["Rishabh Pant","Nicholas Pooran","Mitchell Marsh","Aiden Markram","Ayush Badoni","Abdul Samad","Matthew Breetzke","Himmat Singh","Shahbaz Ahmed","Arshin Kulkarni","Mayank Prabhu Yadav","Avesh Khan","Mohsin Khan","Manimaran Siddharth","Digvesh Singh Rathi","Prince Yadav","Akash Maharaj Singh","Mohammed Shami","Arjun Sachin Tendulkar","Josh Inglis","Mukul Choudhary","Akshat Raghuwanshi","Anrich Nortje","Wanindu Hasaranga","Naman Tiwari"]
 };
+const ALL_PLAYERS = Object.values(IPL_PLAYERS).flat().sort();
 
-let db = null;
+const DEFAULT_SCORING = { rankExact:10, rankOff1:5, rankOff2:2, winner:25, runnerUp:15, runsExact:15, runsPartial:5, wicketsExact:15, wicketsPartial:5, mvp:30 };
+
+// Default deadline: March 28 2026, 7:30 PM IST (= 2:00 PM UTC)
+const DEFAULT_DEADLINE = '2026-03-28T19:30:00+05:30';
+
+let db = null, currentGroupId = null, currentGroupName = null, activeListener = null;
+let sessionPassword = null; // cached for this session after first entry
+let pendingAction = null;   // action waiting for password confirmation
+
 let state = {
-  participants: [],
-  predictions: {},
-  actualResults: null,
-  scoring: { ...DEFAULT_SCORING },
-  scores: {}
+  participants: [], predictions: {}, actualResults: null,
+  scoring: { ...DEFAULT_SCORING }, scores: {},
+  deadline: DEFAULT_DEADLINE,  // ISO string
+  forceLocked: false,          // admin manual lock override
+  userLocks: {}                // { participantName: true/false } per-user prediction lock
 };
 
-// =================== FIREBASE CONFIG (EMBEDDED) ===================
 const FIREBASE_CONFIG = {
   apiKey: "AIzaSyBYsLE3n4QJ-lXahBtcIY0DOtLanm_JdP0",
   authDomain: "ipl-prediction-450fb.firebaseapp.com",
@@ -586,33 +660,283 @@ const FIREBASE_CONFIG = {
   appId: "1:899723959700:web:bb2369ed4a934f25400381"
 };
 
+// =================== PASSWORD SYSTEM ===================
+function requirePassword(actionName) {
+  if (sessionPassword) {
+    // Already authenticated this session, verify against stored
+    verifyAndRun(sessionPassword, actionName);
+    return;
+  }
+  pendingAction = actionName;
+  document.getElementById('pwModalInput').value = '';
+  document.getElementById('passwordModal').classList.remove('hidden');
+  setTimeout(() => document.getElementById('pwModalInput').focus(), 100);
+}
+
+function confirmPassword() {
+  const pw = document.getElementById('pwModalInput').value;
+  if (!pw) { showToast('Enter the password!', true); return; }
+  document.getElementById('passwordModal').classList.add('hidden');
+  verifyAndRun(pw, pendingAction);
+}
+
+function cancelPassword() {
+  pendingAction = null;
+  document.getElementById('passwordModal').classList.add('hidden');
+}
+
+function verifyAndRun(pw, actionName) {
+  if (!currentGroupId) return;
+  db.ref('groups/' + currentGroupId + '/meta/password').once('value', (snap) => {
+    const stored = snap.val();
+    if (pw !== stored) {
+      sessionPassword = null;
+      showToast('Wrong password!', true);
+      return;
+    }
+    sessionPassword = pw;
+    // Execute the pending action
+    switch(actionName) {
+      case 'submitPrediction': doSubmitPrediction(); break;
+      case 'addParticipant': doAddParticipant(); break;
+      case 'bulkAdd': doBulkAdd(); break;
+      case 'removeParticipant': doRemoveParticipant(pendingRemoveName); break;
+      case 'saveActualResults': doSaveActualResults(); break;
+      case 'calculateScores': doCalculateScores(); break;
+      case 'saveScoring': doSaveScoring(); break;
+      case 'resetScoring': doResetScoring(); break;
+      case 'saveDeadline': doSaveDeadline(); break;
+      case 'toggleLock': doToggleLock(); break;
+      case 'toggleAddLock': doToggleAddLock(); break;
+      case 'unlockUser': doUnlockUser(); break;
+    }
+  });
+}
+
+// =================== DEADLINE & LOCK ===================
+function isDeadlinePassed() {
+  if (!state.deadline) return false;
+  return new Date() > new Date(state.deadline);
+}
+
+function isPredictionLocked() {
+  const deadlinePassed = isDeadlinePassed();
+  // Toggle overrides in BOTH directions:
+  // Before deadline: toggle ON = force lock early
+  // After deadline: toggle ON = force UNLOCK (override deadline)
+  if (state.forceLocked) {
+    return deadlinePassed ? false : true;
+  }
+  // Toggle OFF = default behavior (deadline controls)
+  return deadlinePassed;
+}
+
+function updateDeadlineUI() {
+  const dl = state.deadline ? new Date(state.deadline) : new Date(DEFAULT_DEADLINE);
+  const dlText = document.getElementById('deadlineText');
+  const cdText = document.getElementById('countdownText');
+  const lockBanner = document.getElementById('predLockedBanner');
+  const infoBanner = document.getElementById('predInfoBanner');
+  const submitBtn = document.getElementById('submitBtn');
+
+  dlText.textContent = dl.toLocaleString('en-IN', { dateStyle: 'medium', timeStyle: 'short', timeZone: 'Asia/Kolkata' });
+
+  const locked = isPredictionLocked();
+  const deadlinePassed = isDeadlinePassed();
+
+  if (locked) {
+    if (deadlinePassed && !state.forceLocked) {
+      cdText.textContent = 'DEADLINE PASSED';
+    } else if (!deadlinePassed && state.forceLocked) {
+      cdText.textContent = 'LOCKED BY ADMIN';
+    } else {
+      cdText.textContent = 'LOCKED';
+    }
+    cdText.className = 'countdown expired';
+    lockBanner.classList.remove('hidden');
+    infoBanner.classList.add('hidden');
+    submitBtn.disabled = true;
+    submitBtn.textContent = 'Predictions Locked';
+  } else {
+    infoBanner.classList.remove('hidden');
+    lockBanner.classList.add('hidden');
+    submitBtn.disabled = false;
+    submitBtn.textContent = 'Submit Prediction';
+    if (deadlinePassed && state.forceLocked) {
+      cdText.textContent = 'REOPENED BY ADMIN';
+      cdText.className = 'countdown active';
+    } else {
+      updateCountdown(dl, cdText);
+    }
+  }
+
+  // Update admin toggle — label changes based on context
+  const toggle = document.getElementById('lockToggle');
+  const label = document.getElementById('lockLabel');
+  if (state.forceLocked) {
+    toggle.classList.add('on');
+    label.textContent = deadlinePassed ? 'Force Unlocked' : 'Force Locked';
+  } else {
+    toggle.classList.remove('on');
+    label.textContent = deadlinePassed ? 'Locked (deadline)' : 'Open';
+  }
+
+  // Admin deadline input
+  const adInput = document.getElementById('adminDeadline');
+  if (state.deadline) {
+    // Convert to local datetime-local format
+    const d = new Date(state.deadline);
+    const local = new Date(d.getTime() - d.getTimezoneOffset() * 60000).toISOString().slice(0, 16);
+    adInput.value = local;
+  }
+}
+
+function updateCountdown(deadline, el) {
+  const update = () => {
+    const now = new Date(), diff = deadline - now;
+    if (diff <= 0) { el.textContent = 'LOCKED'; el.className = 'countdown expired'; updateDeadlineUI(); return; }
+    const d = Math.floor(diff / 86400000), h = Math.floor((diff % 86400000) / 3600000), m = Math.floor((diff % 3600000) / 60000), s = Math.floor((diff % 60000) / 1000);
+    el.textContent = (d > 0 ? d + 'd ' : '') + h + 'h ' + m + 'm ' + s + 's left';
+    el.className = 'countdown active';
+  };
+  update();
+  setInterval(update, 1000);
+}
+
+function doSaveDeadline() {
+  const val = document.getElementById('adminDeadline').value;
+  if (!val) { showToast('Set a deadline first!', true); return; }
+  state.deadline = new Date(val).toISOString();
+  state.forceLocked = false;
+  fbSet('deadline', state.deadline);
+  fbSet('forceLocked', false);
+  showToast('Deadline updated!');
+}
+
+function doToggleLock() {
+  state.forceLocked = !state.forceLocked;
+  fbSet('forceLocked', state.forceLocked);
+  const dp = isDeadlinePassed();
+  if (state.forceLocked) {
+    showToast(dp ? 'Predictions reopened!' : 'Predictions force-locked!');
+  } else {
+    showToast(dp ? 'Predictions locked (deadline applies)' : 'Predictions open (deadline applies)');
+  }
+}
+
+// =================== GROUP MANAGEMENT ===================
+function generateGroupCode() { return Math.random().toString(36).substring(2, 8).toUpperCase(); }
+function slugify(str) { return str.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/^-|-$/g, ''); }
+function getSavedGroups() { try { return JSON.parse(localStorage.getItem('ipl2026_groups') || '[]'); } catch(e) { return []; } }
+
+function saveGroupToHistory(groupId, groupName) {
+  const groups = getSavedGroups().filter(g => g.id !== groupId);
+  groups.unshift({ id: groupId, name: groupName, lastUsed: Date.now() });
+  if (groups.length > 10) groups.length = 10;
+  localStorage.setItem('ipl2026_groups', JSON.stringify(groups));
+  localStorage.setItem('ipl2026_last_group', groupId);
+}
+
+function createGroup() {
+  const name = document.getElementById('newGroupName').value.trim();
+  const pw = document.getElementById('newGroupPassword').value.trim();
+  if (!name) { showToast('Enter a group name!', true); return; }
+  if (!pw) { showToast('Set a password for your group!', true); return; }
+
+  const code = generateGroupCode();
+  const groupId = slugify(name) + '-' + code;
+
+  db.ref('groups/' + groupId + '/meta').set({
+    name: name, createdAt: new Date().toISOString(), code: code, password: pw
+  });
+  db.ref('groups/' + groupId + '/contest/deadline').set(DEFAULT_DEADLINE);
+  db.ref('groups/' + groupId + '/contest/forceLocked').set(false);
+  db.ref('groups/' + groupId + '/contest/scoring').set(DEFAULT_SCORING);
+
+  saveGroupToHistory(groupId, name);
+  sessionPassword = pw; // auto-authenticate creator
+  enterGroup(groupId, name);
+  showToast('Group "' + name + '" created! Share code: ' + groupId);
+}
+
+function joinGroup() {
+  const groupId = document.getElementById('joinGroupCode').value.trim();
+  if (!groupId) { showToast('Enter a group code!', true); return; }
+  db.ref('groups/' + groupId + '/meta').once('value', (snap) => {
+    const meta = snap.val();
+    if (!meta) { showToast('Group not found!', true); return; }
+    saveGroupToHistory(groupId, meta.name);
+    enterGroup(groupId, meta.name);
+  });
+}
+
+function enterGroup(groupId, groupName) {
+  currentGroupId = groupId; currentGroupName = groupName;
+  window.location.hash = groupId;
+  document.getElementById('groupNameDisplay').textContent = groupName;
+  document.getElementById('groupOverlay').classList.add('hidden');
+  document.getElementById('loadingOverlay').classList.remove('hidden');
+
+  if (activeListener) { db.ref(activeListener).off(); activeListener = null; }
+  state = { participants: [], predictions: {}, actualResults: null, scoring: { ...DEFAULT_SCORING }, scores: {}, deadline: DEFAULT_DEADLINE, forceLocked: false, userLocks: {}, addLocked: false };
+
+  const path = 'groups/' + groupId + '/contest';
+  activeListener = path;
+  db.ref(path).on('value', (snap) => {
+    const data = snap.val();
+    if (data) {
+      state.participants = data.participants || [];
+      state.predictions = data.predictions || {};
+      state.actualResults = data.actualResults || null;
+      state.scoring = { ...DEFAULT_SCORING, ...(data.scoring || {}) };
+      state.scores = data.scores || {};
+      state.deadline = data.deadline || DEFAULT_DEADLINE;
+      state.forceLocked = data.forceLocked || false;
+      state.userLocks = data.userLocks || {};
+      state.addLocked = data.addLocked || false;
+    }
+    renderAll();
+    document.getElementById('loadingOverlay').classList.add('hidden');
+  }, (err) => {
+    console.error(err);
+    document.getElementById('loadingOverlay').classList.add('hidden');
+    showToast('Database error: ' + err.message, true);
+  });
+}
+
+function showGroupOverlay() {
+  renderRecentGroups();
+  document.getElementById('groupOverlay').classList.remove('hidden');
+}
+
+function renderRecentGroups() {
+  const groups = getSavedGroups(), div = document.getElementById('recentGroups');
+  if (!groups.length) { div.innerHTML = ''; return; }
+  div.innerHTML = '<p style="color:var(--muted); font-size:0.85em; margin-bottom:8px;">Your groups:</p>' +
+    groups.map(g =>
+      '<div style="display:flex; justify-content:space-between; align-items:center; padding:10px 12px; background:var(--bg); border:1px solid var(--border); border-radius:8px; margin-bottom:6px; cursor:pointer;" onclick="rejoinGroup(\'' + g.id.replace(/'/g,"\\'") + '\')">' +
+      '<div><strong style="font-size:0.9em;">' + g.name + '</strong><br><span style="font-size:0.75em; color:var(--muted);">Code: ' + g.id + '</span></div>' +
+      '<span style="font-size:0.8em; color:var(--accent);">Enter &rarr;</span></div>'
+    ).join('');
+}
+
+function rejoinGroup(groupId) {
+  db.ref('groups/' + groupId + '/meta').once('value', (snap) => {
+    const meta = snap.val();
+    if (!meta) { showToast('Group no longer exists!', true); return; }
+    saveGroupToHistory(groupId, meta.name);
+    sessionPassword = null; // reset password for different group
+    enterGroup(groupId, meta.name);
+  });
+}
+
+// =================== FIREBASE ===================
 function initFirebase(config) {
   try {
     if (!firebase.apps.length) firebase.initializeApp(config);
     db = firebase.database();
-
-    // Connection monitoring
     db.ref('.info/connected').on('value', (snap) => {
-      document.getElementById('connStatus').className =
-        'conn-status ' + (snap.val() ? 'online' : 'offline');
-    });
-
-    // Real-time sync
-    db.ref('contest').on('value', (snap) => {
-      const data = snap.val();
-      if (data) {
-        state.participants = data.participants || [];
-        state.predictions = data.predictions || {};
-        state.actualResults = data.actualResults || null;
-        state.scoring = { ...DEFAULT_SCORING, ...(data.scoring || {}) };
-        state.scores = data.scores || {};
-      }
-      renderAll();
-      document.getElementById('loadingOverlay').classList.add('hidden');
-    }, (err) => {
-      console.error('Firebase read error:', err);
-      document.getElementById('loadingOverlay').classList.add('hidden');
-      showToast('Database error: ' + err.message, true);
+      document.getElementById('connStatus').className = 'conn-status ' + (snap.val() ? 'online' : 'offline');
     });
   } catch(e) {
     console.error('Firebase init error:', e);
@@ -622,14 +946,28 @@ function initFirebase(config) {
 }
 
 function fbSet(path, data) {
-  if (!db) return Promise.resolve();
-  return db.ref('contest/' + path).set(data);
+  if (!db || !currentGroupId) return Promise.resolve();
+  return db.ref('groups/' + currentGroupId + '/contest/' + path).set(data);
 }
 
 // =================== BOOT ===================
 function boot() {
-  initUI();
-  initFirebase(FIREBASE_CONFIG);
+  initUI(); initFirebase(FIREBASE_CONFIG);
+  const hashGroup = window.location.hash.replace('#', '').trim();
+  if (hashGroup) {
+    db.ref('groups/' + hashGroup + '/meta').once('value', (snap) => {
+      if (snap.val()) { saveGroupToHistory(hashGroup, snap.val().name); enterGroup(hashGroup, snap.val().name); return; }
+      showGroupScreen();
+    }); return;
+  }
+  showGroupScreen();
+}
+
+
+function showGroupScreen() {
+  document.getElementById('loadingOverlay').classList.add('hidden');
+  renderRecentGroups();
+  document.getElementById('groupOverlay').classList.remove('hidden');
 }
 
 function initUI() {
@@ -640,20 +978,25 @@ function initUI() {
   createPlayerInputs('actualRunsInputs', 'arun', 5);
   createPlayerInputs('actualWicketsInputs', 'awkt', 5);
   populateTeamSelects();
+  // Setup autocomplete for MVP and admin MVP
+  setupAutocomplete('predMVP', 'predMVP_ac');
+  if (document.getElementById('actualMVP')) setupAutocomplete('actualMVP', 'actualMVP_ac');
 }
 
 function renderAll() {
-  renderParticipants();
-  updatePlayerSelect();
-  loadScoring();
-  loadActualResults();
+  renderParticipants(); updatePlayerSelect(); loadScoring(); loadActualResults();
+  updateDeadlineUI(); updateAddLockUI();
   if (Object.keys(state.scores).length > 0) renderLeaderboard();
   const sel = document.getElementById('currentPlayer');
   if (sel.value && state.predictions[sel.value]) loadPredictionForPlayer(sel.value);
-  const total = state.participants.length;
-  const submitted = Object.keys(state.predictions).length;
-  document.getElementById('participantCount').textContent =
-    total + ' participants | ' + submitted + ' predictions submitted';
+  const total = state.participants.length, submitted = Object.keys(state.predictions).length;
+  document.getElementById('participantCount').textContent = total + ' participants | ' + submitted + ' predictions submitted';
+  if (currentGroupName) document.getElementById('groupNameDisplay').textContent = currentGroupName;
+  if (currentGroupId) {
+    document.getElementById('shareGroupCode').textContent = currentGroupId;
+    document.getElementById('shareGroupLink').value = getGroupShareLink();
+    if (navigator.share) document.getElementById('nativeShareBtn').style.display = 'inline-flex';
+  }
 }
 
 // =================== TABS ===================
@@ -669,111 +1012,338 @@ document.querySelectorAll('.tab').forEach(tab => {
 // =================== TOAST ===================
 function showToast(msg, isError) {
   const t = document.getElementById('toast');
-  t.textContent = msg;
-  t.className = 'toast show' + (isError ? ' error' : '');
+  t.textContent = msg; t.className = 'toast show' + (isError ? ' error' : '');
   setTimeout(() => t.className = 'toast', 2500);
 }
 
 // =================== RANK LIST ===================
+// Touch drag state
+var touchDrag = { active: false, el: null, clone: null, containerId: null, startY: 0, startX: 0, team: null, placeholder: null, scrollInterval: null };
+
 function createRankList(containerId, teams) {
-  const ul = document.getElementById(containerId);
-  if (!ul) return;
+  const ul = document.getElementById(containerId); if (!ul) return;
   ul.innerHTML = '';
   teams.forEach((team, i) => {
-    const li = document.createElement('li');
-    li.className = 'rank-item';
-    li.draggable = true;
-    li.dataset.team = team;
-    const numClass = i < 3 ? 'r' + (i + 1) : 'rn';
-    li.innerHTML =
-      '<div class="rank-number ' + numClass + '">' + (i + 1) + '</div>' +
-      '<div class="rank-team">' + team + '</div>' +
-      '<div class="rank-arrows">' +
-        '<button onclick="moveRank(\'' + containerId + '\',\'' + team.replace(/'/g,"\\'") + '\',-1)">&#9650;</button>' +
-        '<button onclick="moveRank(\'' + containerId + '\',\'' + team.replace(/'/g,"\\'") + '\',1)">&#9660;</button>' +
-      '</div>';
+    const li = document.createElement('li'); li.className = 'rank-item'; li.draggable = true; li.dataset.team = team;
+    const nc = i < 3 ? 'r' + (i+1) : 'rn';
+    const esc = team.replace(/'/g, "\\'");
+    li.innerHTML = '<div class="drag-handle">&#9776;</div><div class="rank-number ' + nc + '">' + (i+1) + '</div><div class="rank-team">' + team + '</div><div class="rank-arrows"><button onclick="moveRank(\'' + containerId + '\',\'' + esc + '\',-1)">&#9650;</button><button onclick="moveRank(\'' + containerId + '\',\'' + esc + '\',1)">&#9660;</button></div>';
 
+    // Desktop drag
     li.addEventListener('dragstart', (e) => { li.classList.add('dragging'); e.dataTransfer.setData('text/plain', team); });
     li.addEventListener('dragend', () => { li.classList.remove('dragging'); ul.querySelectorAll('.rank-item').forEach(el => el.classList.remove('drag-over')); });
     li.addEventListener('dragover', (e) => { e.preventDefault(); li.classList.add('drag-over'); });
     li.addEventListener('dragleave', () => li.classList.remove('drag-over'));
-    li.addEventListener('drop', (e) => {
-      e.preventDefault(); li.classList.remove('drag-over');
-      const from = e.dataTransfer.getData('text/plain');
-      if (from !== team) reorderList(containerId, from, team);
-    });
+    li.addEventListener('drop', (e) => { e.preventDefault(); li.classList.remove('drag-over'); const from = e.dataTransfer.getData('text/plain'); if (from !== team) reorderList(containerId, from, team); });
 
-    // Touch support
-    let touchY = 0;
-    li.addEventListener('touchstart', (e) => { touchY = e.touches[0].clientY; }, { passive: true });
-    li.addEventListener('touchend', (e) => {
-      const diff = touchY - e.changedTouches[0].clientY;
-      if (Math.abs(diff) > 30) moveRank(containerId, team, diff > 0 ? -1 : 1);
+    // Touch drag
+    li.addEventListener('touchstart', function(e) {
+      if (e.touches.length > 1) return;
+      const t = e.touches[0];
+      touchDrag.startY = t.clientY;
+      touchDrag.startX = t.clientX;
+      touchDrag.team = team;
+      touchDrag.containerId = containerId;
+      touchDrag.el = li;
+      touchDrag.moved = false;
+      touchDrag.longPressTimer = setTimeout(() => {
+        startTouchDrag(li, t, containerId, team);
+      }, 200);
+    }, { passive: true });
+
+    li.addEventListener('touchmove', function(e) {
+      if (!touchDrag.active && touchDrag.longPressTimer) {
+        const t = e.touches[0];
+        const dx = Math.abs(t.clientX - touchDrag.startX);
+        const dy = Math.abs(t.clientY - touchDrag.startY);
+        // If moved enough before long press, start immediately
+        if (dy > 10 && dy > dx) {
+          clearTimeout(touchDrag.longPressTimer);
+          touchDrag.longPressTimer = null;
+          startTouchDrag(li, e.touches[0], containerId, team);
+          e.preventDefault();
+        } else if (dx > 10) {
+          clearTimeout(touchDrag.longPressTimer);
+          touchDrag.longPressTimer = null;
+        }
+      }
+      if (touchDrag.active && touchDrag.el === li) {
+        e.preventDefault();
+        moveTouchDrag(e.touches[0]);
+      }
+    }, { passive: false });
+
+    li.addEventListener('touchend', function(e) {
+      if (touchDrag.longPressTimer) {
+        clearTimeout(touchDrag.longPressTimer);
+        touchDrag.longPressTimer = null;
+      }
+      if (touchDrag.active && touchDrag.el === li) {
+        endTouchDrag();
+      }
     }, { passive: true });
 
     ul.appendChild(li);
   });
 }
 
-function getListOrder(id) {
-  const el = document.getElementById(id);
-  return el ? Array.from(el.children).map(li => li.dataset.team) : [...TEAMS];
+function startTouchDrag(li, touch, containerId, team) {
+  touchDrag.active = true;
+  const rect = li.getBoundingClientRect();
+
+  // Create floating clone
+  const clone = li.cloneNode(true);
+  clone.classList.add('touch-dragging');
+  clone.style.left = rect.left + 'px';
+  clone.style.top = rect.top + 'px';
+  clone.style.width = rect.width + 'px';
+  document.body.appendChild(clone);
+  touchDrag.clone = clone;
+  touchDrag.offsetY = touch.clientY - rect.top;
+
+  // Mark original as placeholder
+  li.classList.add('touch-placeholder');
+
+  // Vibrate if supported
+  if (navigator.vibrate) navigator.vibrate(30);
 }
 
-function reorderList(id, from, to) {
-  const o = getListOrder(id), fi = o.indexOf(from), ti = o.indexOf(to);
-  o.splice(fi, 1); o.splice(ti, 0, from);
-  createRankList(id, o);
-}
+function moveTouchDrag(touch) {
+  if (!touchDrag.clone) return;
+  const y = touch.clientY - touchDrag.offsetY;
+  touchDrag.clone.style.top = y + 'px';
 
-function moveRank(id, team, dir) {
-  const o = getListOrder(id), i = o.indexOf(team), n = i + dir;
-  if (n < 0 || n >= o.length) return;
-  o.splice(i, 1); o.splice(n, 0, team);
-  createRankList(id, o);
-}
+  // Auto-scroll near edges
+  const edgeZone = 60;
+  if (touch.clientY < edgeZone) {
+    window.scrollBy(0, -8);
+  } else if (touch.clientY > window.innerHeight - edgeZone) {
+    window.scrollBy(0, 8);
+  }
 
-// =================== PLAYER INPUTS ===================
-function createPlayerInputs(containerId, prefix, count) {
-  const div = document.getElementById(containerId);
-  if (!div) return;
-  div.innerHTML = '';
-  for (let i = 0; i < count; i++) {
-    const nc = i < 3 ? 'r' + (i + 1) : 'rn';
-    div.innerHTML += '<div class="player-row"><div class="rank-number ' + nc + '">' + (i+1) + '</div><input type="text" id="' + prefix + i + '" placeholder="Player name..."></div>';
+  // Find which item we're over
+  const ul = document.getElementById(touchDrag.containerId);
+  if (!ul) return;
+  const items = Array.from(ul.children);
+  items.forEach(item => {
+    item.classList.remove('drop-target-above', 'drop-target-below');
+  });
+
+  for (const item of items) {
+    if (item === touchDrag.el) continue;
+    const r = item.getBoundingClientRect();
+    const mid = r.top + r.height / 2;
+    if (touch.clientY >= r.top && touch.clientY <= r.bottom) {
+      if (touch.clientY < mid) {
+        item.classList.add('drop-target-above');
+      } else {
+        item.classList.add('drop-target-below');
+      }
+      touchDrag.dropTarget = item;
+      touchDrag.dropBefore = touch.clientY < mid;
+      break;
+    }
   }
 }
 
-// =================== TEAM SELECTS ===================
+function endTouchDrag() {
+  if (touchDrag.clone) {
+    touchDrag.clone.remove();
+  }
+
+  const ul = document.getElementById(touchDrag.containerId);
+  if (ul) {
+    Array.from(ul.children).forEach(item => {
+      item.classList.remove('touch-placeholder', 'drop-target-above', 'drop-target-below');
+    });
+  }
+
+  // Perform the reorder
+  if (touchDrag.dropTarget && touchDrag.dropTarget !== touchDrag.el) {
+    const order = getListOrder(touchDrag.containerId);
+    const fromTeam = touchDrag.team;
+    const toTeam = touchDrag.dropTarget.dataset.team;
+    const fromIdx = order.indexOf(fromTeam);
+    let toIdx = order.indexOf(toTeam);
+    order.splice(fromIdx, 1);
+    toIdx = order.indexOf(toTeam);
+    if (!touchDrag.dropBefore) toIdx++;
+    order.splice(toIdx, 0, fromTeam);
+    createRankList(touchDrag.containerId, order);
+
+    // Flash dropped item
+    const newUl = document.getElementById(touchDrag.containerId);
+    const newIdx = order.indexOf(fromTeam);
+    if (newUl && newUl.children[newIdx]) {
+      newUl.children[newIdx].style.borderColor = 'var(--gold)';
+      newUl.children[newIdx].style.background = 'rgba(245,197,24,0.08)';
+      setTimeout(() => { if (newUl.children[newIdx]) { newUl.children[newIdx].style.borderColor = ''; newUl.children[newIdx].style.background = ''; } }, 400);
+    }
+  }
+
+  touchDrag.active = false;
+  touchDrag.el = null;
+  touchDrag.clone = null;
+  touchDrag.dropTarget = null;
+  touchDrag.longPressTimer = null;
+}
+function getListOrder(id) { const el = document.getElementById(id); return el ? Array.from(el.children).map(li => li.dataset.team) : [...TEAMS]; }
+function reorderList(id, from, to) { const o = getListOrder(id); o.splice(o.indexOf(from), 1); o.splice(o.indexOf(to), 0, from); createRankList(id, o); }
+function moveRank(id, team, dir) {
+  const o = getListOrder(id), i = o.indexOf(team), n = i + dir;
+  if (n < 0 || n >= o.length) return;
+  o.splice(i, 1); o.splice(n, 0, team); createRankList(id, o);
+  // Flash the moved item
+  const ul = document.getElementById(id);
+  if (ul && ul.children[n]) {
+    ul.children[n].style.borderColor = 'var(--gold)';
+    ul.children[n].style.background = 'rgba(245,197,24,0.08)';
+    setTimeout(() => { if (ul.children[n]) { ul.children[n].style.borderColor = ''; ul.children[n].style.background = ''; } }, 300);
+  }
+}
+
+function createPlayerInputs(containerId, prefix, count) {
+  const div = document.getElementById(containerId); if (!div) return; div.innerHTML = '';
+  for (let i = 0; i < count; i++) {
+    const nc = i < 3 ? 'r' + (i+1) : 'rn';
+    const inputId = prefix + i;
+    const acId = inputId + '_ac';
+    div.innerHTML += '<div class="player-row"><div class="rank-number ' + nc + '">' + (i+1) + '</div><div class="ac-wrap"><input type="text" id="' + inputId + '" placeholder="Start typing player name..." autocomplete="off"><div class="ac-list" id="' + acId + '"></div></div></div>';
+  }
+  // Attach autocomplete after DOM is ready
+  setTimeout(() => {
+    for (let i = 0; i < count; i++) {
+      setupAutocomplete(prefix + i, prefix + i + '_ac');
+    }
+  }, 0);
+}
+
+function getPlayerTeam(name) {
+  for (const [team, players] of Object.entries(IPL_PLAYERS)) {
+    if (players.includes(name)) return team;
+  }
+  return '';
+}
+
+function getTeamAbbr(team) {
+  const abbrs = { "Chennai Super Kings":"CSK", "Mumbai Indians":"MI", "Royal Challengers Bengaluru":"RCB", "Kolkata Knight Riders":"KKR", "Delhi Capitals":"DC", "Rajasthan Royals":"RR", "Punjab Kings":"PBKS", "SunRisers Hyderabad":"SRH", "Gujarat Titans":"GT", "Lucknow Super Giants":"LSG" };
+  return abbrs[team] || team;
+}
+
+function setupAutocomplete(inputId, listId) {
+  const input = document.getElementById(inputId);
+  const list = document.getElementById(listId);
+  if (!input || !list) return;
+  let activeIdx = -1;
+
+  input.addEventListener('input', function() {
+    const q = this.value.toLowerCase().trim();
+    if (q.length < 1) { list.classList.remove('show'); return; }
+    const matches = ALL_PLAYERS.filter(p => p.toLowerCase().includes(q)).slice(0, 10);
+    if (!matches.length) { list.classList.remove('show'); return; }
+    activeIdx = -1;
+    list.innerHTML = matches.map((p, i) => {
+      const team = getPlayerTeam(p);
+      return '<div class="ac-item" data-idx="' + i + '" data-val="' + p + '"><span>' + p + '</span><span class="ac-team">' + getTeamAbbr(team) + '</span></div>';
+    }).join('');
+    list.classList.add('show');
+    list.querySelectorAll('.ac-item').forEach(item => {
+      item.addEventListener('mousedown', function(e) {
+        e.preventDefault();
+        input.value = this.dataset.val;
+        list.classList.remove('show');
+      });
+    });
+  });
+
+  input.addEventListener('keydown', function(e) {
+    const items = list.querySelectorAll('.ac-item');
+    if (!items.length || !list.classList.contains('show')) return;
+    if (e.key === 'ArrowDown') { e.preventDefault(); activeIdx = Math.min(activeIdx + 1, items.length - 1); updateActive(items); }
+    else if (e.key === 'ArrowUp') { e.preventDefault(); activeIdx = Math.max(activeIdx - 1, 0); updateActive(items); }
+    else if (e.key === 'Enter' && activeIdx >= 0) { e.preventDefault(); input.value = items[activeIdx].dataset.val; list.classList.remove('show'); }
+    else if (e.key === 'Escape') { list.classList.remove('show'); }
+  });
+
+  function updateActive(items) {
+    items.forEach((el, i) => el.classList.toggle('active', i === activeIdx));
+    if (items[activeIdx]) items[activeIdx].scrollIntoView({ block: 'nearest' });
+  }
+
+  input.addEventListener('blur', function() { setTimeout(() => list.classList.remove('show'), 150); });
+  input.addEventListener('focus', function() { if (this.value.length >= 1) this.dispatchEvent(new Event('input')); });
+}
+
 function populateTeamSelects() {
   ['predWinner','predRunnerUp','actualWinner','actualRunnerUp'].forEach(id => {
-    const sel = document.getElementById(id);
-    if (!sel) return;
-    const v = sel.value;
+    const sel = document.getElementById(id); if (!sel) return; const v = sel.value;
     sel.innerHTML = '<option value="">-- Select --</option>';
-    TEAMS.forEach(t => { sel.innerHTML += '<option value="' + t + '">' + t + '</option>'; });
-    sel.value = v;
+    TEAMS.forEach(t => { sel.innerHTML += '<option value="' + t + '">' + t + '</option>'; }); sel.value = v;
   });
 }
 
 // =================== PARTICIPANTS ===================
+let pendingRemoveName = null;
+
 function addParticipant() {
-  const input = document.getElementById('newParticipant');
-  const name = input.value.trim();
+  if (state.addLocked) { requirePassword('addParticipant'); return; }
+  doAddParticipant();
+}
+function doAddParticipant() {
+  const input = document.getElementById('newParticipant'), name = input.value.trim();
   if (!name) return;
   if (state.participants.includes(name)) { showToast('Already added!'); return; }
-  state.participants.push(name);
-  input.value = '';
+  state.participants.push(name); input.value = '';
   fbSet('participants', state.participants);
 }
 
-function removeParticipant(name) {
+function bulkAddParticipants() {
+  if (state.addLocked) { requirePassword('bulkAdd'); return; }
+  doBulkAdd();
+}
+function doBulkAdd() {
+  const input = document.getElementById('bulkParticipants');
+  const names = input.value.split(',').map(n => n.trim()).filter(n => n.length > 0);
+  if (!names.length) { showToast('Enter comma-separated names!', true); return; }
+  let added = 0;
+  names.forEach(name => {
+    if (!state.participants.includes(name)) { state.participants.push(name); added++; }
+  });
+  if (added > 0) {
+    fbSet('participants', state.participants);
+    showToast(added + ' participant' + (added > 1 ? 's' : '') + ' added!');
+  } else {
+    showToast('All names already exist!', true);
+  }
+  input.value = '';
+}
+
+function toggleAddParticipantLock() { requirePassword('toggleAddLock'); }
+function doToggleAddLock() {
+  state.addLocked = !state.addLocked;
+  fbSet('addLocked', state.addLocked);
+  updateAddLockUI();
+  showToast(state.addLocked ? 'Adding participants now requires password' : 'Anyone can add participants now');
+}
+
+function updateAddLockUI() {
+  const btn = document.getElementById('toggleAddLockBtn');
+  const subtitle = document.getElementById('addParticipantSubtitle');
+  if (state.addLocked) {
+    btn.innerHTML = '&#128275; Unlock Adding';
+    subtitle.textContent = 'Adding requires admin password';
+  } else {
+    btn.innerHTML = '&#128274; Lock Adding';
+    subtitle.textContent = 'Anyone can add participants';
+  }
+}
+
+function removeParticipant(name) { pendingRemoveName = name; requirePassword('removeParticipant'); }
+function doRemoveParticipant(name) {
   if (state.predictions[name]) {
-    if (!confirm(name + ' has a submitted prediction. Remove them anyway?')) return;
-    delete state.predictions[name];
-    delete state.scores[name];
-    fbSet('predictions', state.predictions);
-    fbSet('scores', state.scores);
+    if (!confirm(name + ' has a prediction. Remove anyway?')) return;
+    delete state.predictions[name]; delete state.scores[name];
+    fbSet('predictions', state.predictions); fbSet('scores', state.scores);
   }
   state.participants = state.participants.filter(p => p !== name);
   fbSet('participants', state.participants);
@@ -783,29 +1353,265 @@ function renderParticipants() {
   document.getElementById('participantChips').innerHTML = state.participants.map(p =>
     '<span class="participant-chip">' + p + '<span class="remove" onclick="removeParticipant(\'' + p.replace(/'/g,"\\'") + '\')">&times;</span></span>'
   ).join('');
-
-  const total = state.participants.length;
-  const submitted = state.participants.filter(p => !!state.predictions[p]).length;
+  const total = state.participants.length, submitted = state.participants.filter(p => !!state.predictions[p]).length;
   document.getElementById('statTotal').textContent = total;
   document.getElementById('statSubmitted').textContent = submitted;
   document.getElementById('statPending').textContent = total - submitted;
 
-  const list = document.getElementById('submittedList');
-  if (!total) { list.innerHTML = '<p style="color:var(--muted)">No participants yet.</p>'; return; }
-  list.innerHTML = state.participants.map(p => {
-    const done = !!state.predictions[p];
-    return '<div style="display:flex;justify-content:space-between;align-items:center;padding:10px 0;border-bottom:1px solid var(--border);">' +
-      '<span>' + p + '</span>' +
-      '<span style="font-size:0.85em;font-weight:600;color:' + (done ? 'var(--green)' : 'var(--muted)') + ';">' +
-      (done ? '&#10003; Submitted' : '&#9711; Pending') + '</span></div>';
-  }).join('');
+  const div = document.getElementById('participantsTable');
+  if (!total) { div.innerHTML = '<p style="color:var(--muted)">No participants yet.</p>'; return; }
+
+  // Sort: locked first, then submitted, then pending — alphabetical within each
+  const sorted = [...state.participants].sort((a, b) => {
+    const aLocked = state.userLocks[a] ? 0 : 1;
+    const bLocked = state.userLocks[b] ? 0 : 1;
+    if (aLocked !== bLocked) return aLocked - bLocked;
+    const aSub = state.predictions[a] ? 0 : 1;
+    const bSub = state.predictions[b] ? 0 : 1;
+    if (aSub !== bSub) return aSub - bSub;
+    return a.localeCompare(b);
+  });
+
+  let html = '<table class="ptable"><thead><tr><th>Name</th><th>Status</th><th>Lock</th><th>Prediction</th><th></th></tr></thead><tbody>';
+  sorted.forEach((p, idx) => {
+    const hasPred = !!state.predictions[p];
+    const isUserLocked = !!state.userLocks[p];
+    const esc = p.replace(/'/g, "\\'");
+    const safeId = 'pred-view-' + idx;
+
+    // Status pill
+    let statusHtml;
+    if (isUserLocked) {
+      statusHtml = '<span class="status-pill locked">&#128274; Locked</span>';
+    } else if (hasPred) {
+      statusHtml = '<span class="status-pill submitted">&#10003; Submitted</span>';
+    } else {
+      statusHtml = '<span class="status-pill pending">&#9711; Pending</span>';
+    }
+
+    // Lock button — anyone can lock (with password), only admin can unlock
+    let lockHtml;
+    if (isUserLocked) {
+      lockHtml = '<button class="lock-btn is-locked" onclick="unlockUserPrediction(\'' + esc + '\')" title="Admin: Unlock this prediction">&#128274; Locked</button>';
+    } else if (hasPred) {
+      lockHtml = '<button class="lock-btn" onclick="lockUserPrediction(\'' + esc + '\')" title="Lock your prediction">&#128275; Lock</button>';
+    } else {
+      lockHtml = '<span style="font-size:0.8em; color:var(--muted);">—</span>';
+    }
+
+    // View button
+    let viewHtml = hasPred
+      ? '<button class="view-btn" onclick="togglePredView(\'' + safeId + '\')">View</button>'
+      : '<button class="view-btn" disabled>No prediction</button>';
+
+    // Remove button (admin)
+    let removeHtml = '<button class="lock-btn" onclick="removeParticipant(\'' + esc + '\')" title="Remove participant" style="font-size:0.75em; padding:3px 8px;">&times;</button>';
+
+    html += '<tr><td><strong>' + p + '</strong></td><td>' + statusHtml + '</td><td>' + lockHtml + '</td><td>' + viewHtml + '</td><td>' + removeHtml + '</td></tr>';
+
+    // Expandable prediction row
+    if (hasPred) {
+      html += '<tr id="' + safeId + '" class="hidden"><td colspan="5">' + renderPredictionView(p) + '</td></tr>';
+    }
+  });
+
+  html += '</tbody></table>';
+  div.innerHTML = html;
+  renderConsensus();
+}
+
+function renderConsensus() {
+  const div = document.getElementById('consensusContent');
+  const preds = state.participants.filter(p => !!state.predictions[p]).map(p => state.predictions[p]);
+  const total = preds.length;
+
+  if (total < 2) { div.innerHTML = '<p style="color:var(--muted);">Need at least 2 predictions to show consensus.</p>'; return; }
+
+  function countPicks(arr) {
+    const counts = {};
+    arr.forEach(v => { const k = (v || '').trim(); if (k) counts[k] = (counts[k] || 0) + 1; });
+    return Object.entries(counts).sort((a, b) => b[1] - a[1]);
+  }
+
+  function renderBars(title, picks, barClass) {
+    if (!picks.length) return '';
+    let h = '<div class="cons-category"><h4>' + title + '</h4>';
+    picks.slice(0, 5).forEach(([name, count]) => {
+      const pct = Math.round((count / total) * 100);
+      h += '<div class="cons-item">';
+      h += '<span class="cons-label">' + name + '</span>';
+      h += '<div class="cons-bar-bg"><div class="cons-bar ' + barClass + '" style="width:' + pct + '%">' + (pct >= 15 ? pct + '%' : '') + '</div></div>';
+      h += '<span class="cons-count">' + count + '/' + total + '</span>';
+      h += '</div>';
+    });
+    h += '</div>';
+    return h;
+  }
+
+  let h = '';
+
+  // Winner consensus
+  h += renderBars('Winner', countPicks(preds.map(p => p.winner)), 'bar-1');
+
+  // Runner-up consensus
+  h += renderBars('Runner-up', countPicks(preds.map(p => p.runnerUp)), 'bar-2');
+
+  // Most popular #1 team
+  h += renderBars('Predicted #1 Team', countPicks(preds.map(p => (p.teamRanking && p.teamRanking[0]) || '')), 'bar-3');
+
+  // Top 4 qualifiers consensus — teams that appear in anyone's top 4
+  const top4picks = [];
+  preds.forEach(p => { if (p.teamRanking) p.teamRanking.slice(0, 4).forEach(t => top4picks.push(t)); });
+  h += renderBars('Top 4 Qualifiers (in anyone\'s top 4)', countPicks(top4picks), 'bar-4');
+
+  // MVP consensus
+  h += renderBars('MVP', countPicks(preds.map(p => p.mvp)), 'bar-5');
+
+  // Top run scorers consensus — players that appear in anyone's top 5
+  const runPicks = [];
+  preds.forEach(p => { if (p.runs) p.runs.forEach(r => { if (r) runPicks.push(r); }); });
+  h += renderBars('Top Run Scorers (in anyone\'s top 5)', countPicks(runPicks), 'bar-1');
+
+  // Top wicket takers consensus — players that appear in anyone's top 5
+  const wicketPicks = [];
+  preds.forEach(p => { if (p.wickets) p.wickets.forEach(w => { if (w) wicketPicks.push(w); }); });
+  h += renderBars('Top Wicket Takers (in anyone\'s top 5)', countPicks(wicketPicks), 'bar-2');
+
+  // Bottom team consensus (last place)
+  h += renderBars('Predicted Last Place', countPicks(preds.map(p => (p.teamRanking && p.teamRanking[9]) || '')), 'bar-1');
+
+  div.innerHTML = h;
+}
+
+function renderPredictionView(name) {
+  const pred = state.predictions[name];
+  if (!pred) return '';
+
+  let h = '<div class="pred-expand">';
+
+  // Team Rankings
+  h += '<h4>Team Rankings</h4><ul class="pred-rank-list">';
+  (pred.teamRanking || []).forEach((team, i) => {
+    const nc = i < 3 ? ['background:var(--gold);color:#000','background:var(--silver);color:#000','background:var(--bronze);color:#fff'][i] : 'background:var(--accent2);color:var(--text)';
+    h += '<li><span class="rnum" style="' + nc + '">' + (i+1) + '</span>' + team + '</li>';
+  });
+  h += '</ul>';
+
+  // Winner & Runner-up
+  h += '<h4>Winner & Runner-up</h4><div class="pred-grid">';
+  h += '<div class="pred-item"><div class="lbl">Winner</div>' + (pred.winner || '—') + '</div>';
+  h += '<div class="pred-item"><div class="lbl">Runner-up</div>' + (pred.runnerUp || '—') + '</div>';
+  h += '</div>';
+
+  // Top 5 Runs
+  h += '<h4>Top 5 Run Scorers</h4><ul class="pred-rank-list">';
+  (pred.runs || []).forEach((p, i) => {
+    const nc = i < 3 ? ['background:var(--gold);color:#000','background:var(--silver);color:#000','background:var(--bronze);color:#fff'][i] : 'background:var(--accent2);color:var(--text)';
+    h += '<li><span class="rnum" style="' + nc + '">' + (i+1) + '</span>' + (p || '—') + '</li>';
+  });
+  h += '</ul>';
+
+  // Top 5 Wickets
+  h += '<h4>Top 5 Wicket Takers</h4><ul class="pred-rank-list">';
+  (pred.wickets || []).forEach((p, i) => {
+    const nc = i < 3 ? ['background:var(--gold);color:#000','background:var(--silver);color:#000','background:var(--bronze);color:#fff'][i] : 'background:var(--accent2);color:var(--text)';
+    h += '<li><span class="rnum" style="' + nc + '">' + (i+1) + '</span>' + (p || '—') + '</li>';
+  });
+  h += '</ul>';
+
+  // MVP
+  h += '<h4>MVP</h4><div class="pred-item" style="display:inline-block;"><div class="lbl">Player of the Tournament</div>' + (pred.mvp || '—') + '</div>';
+
+  if (pred.submittedAt) {
+    h += '<p style="font-size:0.75em; color:var(--muted); margin-top:12px;">Submitted: ' + new Date(pred.submittedAt).toLocaleString('en-IN', { dateStyle:'medium', timeStyle:'short', timeZone:'Asia/Kolkata' }) + '</p>';
+  }
+
+  h += '</div>';
+  return h;
+}
+
+function togglePredView(id) {
+  const el = document.getElementById(id);
+  if (el) el.classList.toggle('hidden');
+}
+
+// Per-user lock: anyone can lock (no password), only admin can unlock (password required)
+function lockUserPrediction(name) {
+  if (!name || !state.predictions[name]) return;
+  state.userLocks[name] = true;
+  fbSet('userLocks', state.userLocks);
+  showToast(name + '\'s prediction locked!');
+  // Refresh prediction tab UI if this user is currently selected
+  const currentPlayer = document.getElementById('currentPlayer').value;
+  if (currentPlayer === name) {
+    document.getElementById('userLockedBanner').classList.remove('hidden');
+    document.getElementById('submitBtn').disabled = true;
+    document.getElementById('submitBtn').textContent = 'Prediction Locked';
+    document.getElementById('lockMyPredBtn').style.display = 'none';
+  }
+  renderParticipants();
+}
+
+function unlockUserPrediction(name) {
+  pendingLockUser = name;
+  requirePassword('unlockUser');
+}
+
+var pendingLockUser = null;
+
+function lockMyPrediction() {
+  const name = document.getElementById('currentPlayer').value;
+  if (!name) { showToast('Select your name first!', true); return; }
+  if (!state.predictions[name]) { showToast('Submit your prediction first!', true); return; }
+  lockUserPrediction(name);
+}
+
+function doUnlockUser() {
+  if (!pendingLockUser) return;
+  state.userLocks[pendingLockUser] = false;
+  fbSet('userLocks', state.userLocks);
+  showToast(pendingLockUser + '\'s prediction unlocked!');
+  // Refresh prediction tab UI if this user is currently selected
+  const currentPlayer = document.getElementById('currentPlayer').value;
+  if (currentPlayer === pendingLockUser) {
+    document.getElementById('userLockedBanner').classList.add('hidden');
+    document.getElementById('lockMyPredBtn').style.display = 'inline-block';
+    if (!isPredictionLocked()) {
+      document.getElementById('submitBtn').disabled = false;
+      document.getElementById('submitBtn').textContent = 'Submit Prediction';
+    }
+  }
+  pendingLockUser = null;
+  renderParticipants();
 }
 
 function updatePlayerSelect() {
   const sel = document.getElementById('currentPlayer'), v = sel.value;
   sel.innerHTML = '<option value="">-- Select your name --</option>';
-  state.participants.forEach(p => { sel.innerHTML += '<option value="' + p + '">' + p + '</option>'; });
-  sel.value = v;
+  [...state.participants].sort((a, b) => a.localeCompare(b)).forEach(p => { sel.innerHTML += '<option value="' + p + '">' + p + '</option>'; }); sel.value = v;
+}
+
+function getGroupShareLink() {
+  return 'https://laveshgo.github.io/ipl-2026-contest/#' + (currentGroupId || '');
+}
+
+function copyGroupLink() {
+  navigator.clipboard.writeText(getGroupShareLink()).then(() => showToast('Link copied!')).catch(() => showToast('Select and copy manually'));
+}
+
+function shareWhatsApp() {
+  const text = '🏏 Join my IPL 2026 Prediction Contest!\n\nGroup: ' + (currentGroupName || '') + '\n\n👉 ' + getGroupShareLink();
+  window.open('https://wa.me/?text=' + encodeURIComponent(text), '_blank');
+}
+
+function nativeShare() {
+  if (navigator.share) {
+    navigator.share({
+      title: 'IPL 2026 Prediction Contest',
+      text: '🏏 Join my IPL 2026 Prediction Contest! Group: ' + (currentGroupName || ''),
+      url: getGroupShareLink()
+    }).catch(() => {});
+  }
 }
 
 // =================== PREDICTIONS ===================
@@ -822,21 +1628,59 @@ function loadPredictionForPlayer(name) {
       if (w) w.value = (pred.wickets && pred.wickets[i]) || '';
     }
     document.getElementById('lockedBanner').classList.remove('hidden');
+    // Show user-lock warning & lock button
+    const userLockBanner = document.getElementById('userLockedBanner');
+    const lockMyBtn = document.getElementById('lockMyPredBtn');
+    if (state.userLocks[name]) {
+      userLockBanner.classList.remove('hidden');
+      document.getElementById('submitBtn').disabled = true;
+      document.getElementById('submitBtn').textContent = 'Prediction Locked';
+      lockMyBtn.style.display = 'none';
+    } else {
+      userLockBanner.classList.add('hidden');
+      lockMyBtn.style.display = 'inline-block';
+      if (!isPredictionLocked()) {
+        document.getElementById('submitBtn').disabled = false;
+        document.getElementById('submitBtn').textContent = 'Submit Prediction';
+      }
+    }
   } else {
     clearForm();
     document.getElementById('lockedBanner').classList.add('hidden');
+    document.getElementById('userLockedBanner').classList.add('hidden');
+    document.getElementById('lockMyPredBtn').style.display = 'none';
+    if (!isPredictionLocked()) {
+      document.getElementById('submitBtn').disabled = false;
+      document.getElementById('submitBtn').textContent = 'Submit Prediction';
+    }
   }
 }
 
 document.getElementById('currentPlayer').addEventListener('change', function() {
   if (this.value) loadPredictionForPlayer(this.value);
-  else { clearForm(); document.getElementById('lockedBanner').classList.add('hidden'); }
+  else { clearForm(); document.getElementById('lockedBanner').classList.add('hidden'); document.getElementById('userLockedBanner').classList.add('hidden'); document.getElementById('lockMyPredBtn').style.display = 'none'; }
 });
 
 function submitPrediction() {
+  if (isPredictionLocked()) { showToast('Predictions are locked!', true); return; }
   const name = document.getElementById('currentPlayer').value;
   if (!name) { showToast('Select your name first!', true); return; }
+  if (state.userLocks[name]) { showToast('Your prediction is locked! Ask admin to unlock.', true); return; }
 
+  // Validate before asking password
+  const winner = document.getElementById('predWinner').value;
+  const runnerUp = document.getElementById('predRunnerUp').value;
+  const mvp = document.getElementById('predMVP').value.trim();
+  if (!winner) { showToast('Pick a winner!', true); return; }
+  if (!runnerUp) { showToast('Pick a runner-up!', true); return; }
+  if (winner === runnerUp) { showToast('Winner and runner-up must differ!', true); return; }
+  if (!mvp) { showToast('Pick an MVP!', true); return; }
+
+  doSubmitPrediction();
+}
+
+function doSubmitPrediction() {
+  const name = document.getElementById('currentPlayer').value;
   const pred = {
     teamRanking: getListOrder('teamRankList'),
     winner: document.getElementById('predWinner').value,
@@ -845,21 +1689,18 @@ function submitPrediction() {
     mvp: document.getElementById('predMVP').value.trim(),
     submittedAt: new Date().toISOString()
   };
-
   for (let i = 0; i < 5; i++) {
     pred.runs.push((document.getElementById('run' + i) || {}).value?.trim() || '');
     pred.wickets.push((document.getElementById('wkt' + i) || {}).value?.trim() || '');
   }
-
-  if (!pred.winner) { showToast('Pick a winner!', true); return; }
-  if (!pred.runnerUp) { showToast('Pick a runner-up!', true); return; }
-  if (pred.winner === pred.runnerUp) { showToast('Winner and runner-up must be different!', true); return; }
-  if (!pred.mvp) { showToast('Pick an MVP!', true); return; }
-
   state.predictions[name] = pred;
   fbSet('predictions', state.predictions);
   showToast('Prediction saved for ' + name + '!');
   document.getElementById('lockedBanner').classList.remove('hidden');
+  // Show lock button after successful submission
+  if (!state.userLocks[name]) {
+    document.getElementById('lockMyPredBtn').style.display = 'inline-block';
+  }
 }
 
 function clearForm() {
@@ -867,15 +1708,12 @@ function clearForm() {
   document.getElementById('predWinner').value = '';
   document.getElementById('predRunnerUp').value = '';
   document.getElementById('predMVP').value = '';
-  for (let i = 0; i < 5; i++) {
-    const r = document.getElementById('run' + i), w = document.getElementById('wkt' + i);
-    if (r) r.value = ''; if (w) w.value = '';
-  }
+  for (let i = 0; i < 5; i++) { const r = document.getElementById('run' + i), w = document.getElementById('wkt' + i); if (r) r.value = ''; if (w) w.value = ''; }
   document.getElementById('lockedBanner').classList.add('hidden');
 }
 
 // =================== ADMIN ===================
-function saveActualResults() {
+function doSaveActualResults() {
   state.actualResults = {
     teamRanking: getListOrder('actualTeamRankList'),
     winner: document.getElementById('actualWinner').value,
@@ -906,53 +1744,71 @@ function loadActualResults() {
 }
 
 // =================== SCORING ===================
-function saveScoring() {
-  Object.keys(DEFAULT_SCORING).forEach(k => {
-    state.scoring[k] = parseInt(document.getElementById('sc_' + k).value) || 0;
-  });
-  fbSet('scoring', state.scoring);
-  updateMaxPoints();
-  showToast('Scoring rules saved!');
+function doSaveScoring() {
+  Object.keys(DEFAULT_SCORING).forEach(k => { state.scoring[k] = parseInt(document.getElementById('sc_' + k).value) || 0; });
+  fbSet('scoring', state.scoring); updateMaxPoints(); showToast('Scoring rules saved!');
 }
-
-function resetScoring() {
+function doResetScoring() {
   state.scoring = { ...DEFAULT_SCORING };
   Object.keys(DEFAULT_SCORING).forEach(k => { document.getElementById('sc_' + k).value = DEFAULT_SCORING[k]; });
-  fbSet('scoring', state.scoring);
-  updateMaxPoints();
-  showToast('Reset to defaults!');
+  fbSet('scoring', state.scoring); updateMaxPoints(); showToast('Reset to defaults!');
 }
-
 function loadScoring() {
-  Object.keys(DEFAULT_SCORING).forEach(k => {
-    const el = document.getElementById('sc_' + k);
-    if (el) el.value = state.scoring[k] ?? DEFAULT_SCORING[k];
-  });
+  Object.keys(DEFAULT_SCORING).forEach(k => { const el = document.getElementById('sc_' + k); if (el) el.value = state.scoring[k] ?? DEFAULT_SCORING[k]; });
   updateMaxPoints();
 }
-
 function updateMaxPoints() {
-  const s = state.scoring;
-  const max = (s.rankExact*10) + s.winner + s.runnerUp + (s.runsExact*5) + (s.wicketsExact*5) + s.mvp;
-  document.getElementById('maxPointsDisplay').textContent =
-    'Maximum possible score: ' + max + ' points (Rankings: ' + (s.rankExact*10) +
-    ', Winner: ' + s.winner + ', Runner-up: ' + s.runnerUp +
-    ', Runs: ' + (s.runsExact*5) + ', Wickets: ' + (s.wicketsExact*5) + ', MVP: ' + s.mvp + ')';
+  const s = state.scoring, max = (s.rankExact*10) + s.winner + s.runnerUp + (s.runsExact*5) + (s.wicketsExact*5) + s.mvp;
+  document.getElementById('maxPointsDisplay').textContent = 'Maximum possible score: ' + max + ' pts (Rankings: ' + (s.rankExact*10) + ', Winner: ' + s.winner + ', RU: ' + s.runnerUp + ', Runs: ' + (s.runsExact*5) + ', Wickets: ' + (s.wicketsExact*5) + ', MVP: ' + s.mvp + ')';
 }
 
 // =================== CALCULATE ===================
 function normalize(str) { return (str || '').toLowerCase().replace(/[^a-z0-9]/g, ''); }
 
-function calculateScores() {
+// Fuzzy match: checks if two player names likely refer to the same person
+function fuzzyMatch(a, b) {
+  const na = normalize(a), nb = normalize(b);
+  if (!na || !nb) return false;
+  if (na === nb) return true;
+  // One contains the other (e.g. "Virat" matches "Virat Kohli")
+  if (na.includes(nb) || nb.includes(na)) return true;
+  // Check last name match (e.g. "Kohli" matches "Virat Kohli")
+  const partsA = (a || '').toLowerCase().trim().split(/\s+/);
+  const partsB = (b || '').toLowerCase().trim().split(/\s+/);
+  const lastA = partsA[partsA.length - 1], lastB = partsB[partsB.length - 1];
+  if (lastA.length > 2 && lastB.length > 2 && lastA === lastB) return true;
+  // Try matching against the canonical player list
+  const canonA = findCanonicalPlayer(a), canonB = findCanonicalPlayer(b);
+  if (canonA && canonB && canonA === canonB) return true;
+  return false;
+}
+
+function findCanonicalPlayer(input) {
+  const n = normalize(input);
+  if (!n) return null;
+  // Exact match first
+  const exact = ALL_PLAYERS.find(p => normalize(p) === n);
+  if (exact) return exact;
+  // Partial match — input is a substring or last name
+  const parts = (input || '').toLowerCase().trim().split(/\s+/);
+  const lastName = parts[parts.length - 1];
+  const matches = ALL_PLAYERS.filter(p => {
+    const pn = normalize(p);
+    if (pn.includes(n) || n.includes(pn)) return true;
+    const pParts = p.toLowerCase().split(/\s+/);
+    if (lastName.length > 2 && pParts[pParts.length - 1] === lastName) return true;
+    return false;
+  });
+  return matches.length === 1 ? matches[0] : null;
+}
+
+function doCalculateScores() {
   if (!state.actualResults) { showToast('Enter actual results first!', true); return; }
   const actual = state.actualResults, s = state.scoring;
   state.scores = {};
-
   Object.entries(state.predictions).forEach(([name, pred]) => {
     let total = 0;
     const bd = { ranking:0, winner:0, runnerUp:0, runs:0, wickets:0, mvp:0, details:{} };
-
-    // Rankings
     let rp = 0; const rd = [];
     (pred.teamRanking||[]).forEach((team, pi) => {
       const ai = (actual.teamRanking||[]).indexOf(team);
@@ -962,45 +1818,18 @@ function calculateScores() {
       rp += pts; rd.push({team, predicted:pi+1, actual:ai+1, pts});
     });
     bd.ranking = rp; bd.details.ranking = rd; total += rp;
-
-    // Winner / Runner-up
-    if (normalize(pred.winner) === normalize(actual.winner)) { bd.winner = s.winner; total += s.winner; }
-    if (normalize(pred.runnerUp) === normalize(actual.runnerUp)) { bd.runnerUp = s.runnerUp; total += s.runnerUp; }
-
-    // Runs
-    let runsP = 0; const runsD = [];
-    const arn = (actual.runs||[]).map(normalize);
-    (pred.runs||[]).forEach((p, i) => {
-      const pn = normalize(p); let pts = 0;
-      if (pn && pn === arn[i]) pts = s.runsExact;
-      else if (pn && arn.includes(pn)) pts = s.runsPartial;
-      runsP += pts; runsD.push({player:p, predicted:i+1, pts, inList:arn.includes(pn)});
-    });
+    if (fuzzyMatch(pred.winner, actual.winner)) { bd.winner = s.winner; total += s.winner; }
+    if (fuzzyMatch(pred.runnerUp, actual.runnerUp)) { bd.runnerUp = s.runnerUp; total += s.runnerUp; }
+    let runsP = 0; const runsD = []; const actualRuns = actual.runs || [];
+    (pred.runs||[]).forEach((p, i) => { let pts = 0; if (p && actualRuns[i] && fuzzyMatch(p, actualRuns[i])) pts = s.runsExact; else if (p && actualRuns.some(ar => fuzzyMatch(p, ar))) pts = s.runsPartial; runsP += pts; runsD.push({player:p, predicted:i+1, pts}); });
     bd.runs = runsP; bd.details.runs = runsD; total += runsP;
-
-    // Wickets
-    let wktsP = 0; const wktsD = [];
-    const awn = (actual.wickets||[]).map(normalize);
-    (pred.wickets||[]).forEach((p, i) => {
-      const pn = normalize(p); let pts = 0;
-      if (pn && pn === awn[i]) pts = s.wicketsExact;
-      else if (pn && awn.includes(pn)) pts = s.wicketsPartial;
-      wktsP += pts; wktsD.push({player:p, predicted:i+1, pts, inList:awn.includes(pn)});
-    });
+    let wktsP = 0; const wktsD = []; const actualWkts = actual.wickets || [];
+    (pred.wickets||[]).forEach((p, i) => { let pts = 0; if (p && actualWkts[i] && fuzzyMatch(p, actualWkts[i])) pts = s.wicketsExact; else if (p && actualWkts.some(aw => fuzzyMatch(p, aw))) pts = s.wicketsPartial; wktsP += pts; wktsD.push({player:p, predicted:i+1, pts}); });
     bd.wickets = wktsP; bd.details.wickets = wktsD; total += wktsP;
-
-    // MVP
-    if (normalize(pred.mvp) === normalize(actual.mvp)) { bd.mvp = s.mvp; total += s.mvp; }
-
-    bd.total = total;
-    state.scores[name] = bd;
+    if (fuzzyMatch(pred.mvp, actual.mvp)) { bd.mvp = s.mvp; total += s.mvp; }
+    bd.total = total; state.scores[name] = bd;
   });
-
-  fbSet('scores', state.scores);
-  renderLeaderboard();
-  showToast('Scores calculated for everyone!');
-
-  // Switch to leaderboard
+  fbSet('scores', state.scores); renderLeaderboard(); showToast('Scores calculated!');
   document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
   document.querySelectorAll('.section').forEach(s => s.classList.remove('active'));
   document.querySelector('[data-tab="leaderboard"]').classList.add('active');
@@ -1010,68 +1839,41 @@ function calculateScores() {
 // =================== LEADERBOARD ===================
 function renderLeaderboard() {
   const entries = Object.entries(state.scores).sort((a, b) => b[1].total - a[1].total);
-  if (!entries.length) {
-    document.getElementById('leaderboardContent').innerHTML = '<p style="color:var(--muted);">No scores yet.</p>';
-    document.getElementById('breakdownContent').innerHTML = '';
-    return;
-  }
-
+  if (!entries.length) { document.getElementById('leaderboardContent').innerHTML = '<p style="color:var(--muted);">No scores yet.</p>'; document.getElementById('breakdownContent').innerHTML = ''; return; }
   const medals = ['&#127942;','&#129352;','&#129353;'];
   let html = '<table class="leaderboard-table"><thead><tr><th>#</th><th>Player</th><th>Rankings</th><th>W/RU</th><th>Runs</th><th>Wkts</th><th>MVP</th><th>Total</th></tr></thead><tbody>';
   entries.forEach(([name, bd], i) => {
-    html += '<tr><td>' + (i < 3 ? '<span class="medal">' + medals[i] + '</span>' : (i+1)) + '</td>' +
-      '<td><strong>' + name + '</strong></td>' +
-      '<td>' + bd.ranking + '</td><td>' + (bd.winner+bd.runnerUp) + '</td>' +
-      '<td>' + bd.runs + '</td><td>' + bd.wickets + '</td><td>' + bd.mvp + '</td>' +
-      '<td><span class="points-badge' + (i===0?' gold':'') + '">' + bd.total + '</span></td></tr>';
+    html += '<tr><td>' + (i < 3 ? '<span class="medal">' + medals[i] + '</span>' : (i+1)) + '</td><td><strong>' + name + '</strong></td><td>' + bd.ranking + '</td><td>' + (bd.winner+bd.runnerUp) + '</td><td>' + bd.runs + '</td><td>' + bd.wickets + '</td><td>' + bd.mvp + '</td><td><span class="points-badge' + (i===0?' gold':'') + '">' + bd.total + '</span></td></tr>';
   });
   html += '</tbody></table>';
   document.getElementById('leaderboardContent').innerHTML = html;
 
-  // Breakdowns
   let bh = '';
   entries.forEach(([name, bd]) => {
     const sn = normalize(name);
-    bh += '<div style="margin-bottom:12px;"><button class="expand-btn" onclick="toggleBreakdown(\'bd-' + sn + '\')">' +
-      name + ' \u2014 ' + bd.total + ' pts (click to expand)</button><div id="bd-' + sn + '" class="hidden" style="margin-top:8px;">';
-
+    bh += '<div style="margin-bottom:12px;"><button class="expand-btn" onclick="toggleBreakdown(\'bd-' + sn + '\')">' + name + ' \u2014 ' + bd.total + ' pts (expand)</button><div id="bd-' + sn + '" class="hidden" style="margin-top:8px;">';
     if (bd.details && bd.details.ranking) {
-      bh += '<h4 style="font-size:0.85em;color:var(--gold);margin:8px 0 4px;">Team Rankings (' + bd.ranking + ' pts)</h4>';
-      bh += '<table class="compare-table"><tr><th>Team</th><th>Predicted</th><th>Actual</th><th>Pts</th></tr>';
-      bd.details.ranking.forEach(d => {
-        bh += '<tr><td>' + d.team + '</td><td>' + d.predicted + '</td><td>' + d.actual + '</td><td class="' + (d.pts>0?'match':'no-match') + '">' + d.pts + '</td></tr>';
-      });
+      bh += '<h4 style="font-size:0.85em;color:var(--gold);margin:8px 0 4px;">Team Rankings (' + bd.ranking + ' pts)</h4><table class="compare-table"><tr><th>Team</th><th>Pred</th><th>Actual</th><th>Pts</th></tr>';
+      bd.details.ranking.forEach(d => { bh += '<tr><td>' + d.team + '</td><td>' + d.predicted + '</td><td>' + d.actual + '</td><td class="' + (d.pts>0?'match':'no-match') + '">' + d.pts + '</td></tr>'; });
       bh += '</table>';
     }
-
     const pred = state.predictions[name];
     if (pred && state.actualResults) {
-      bh += '<h4 style="font-size:0.85em;color:var(--gold);margin:12px 0 4px;">Winner & Runner-up (' + (bd.winner+bd.runnerUp) + ' pts)</h4>';
-      bh += '<table class="compare-table"><tr><th></th><th>Predicted</th><th>Actual</th><th>Pts</th></tr>';
+      bh += '<h4 style="font-size:0.85em;color:var(--gold);margin:12px 0 4px;">Winner & RU (' + (bd.winner+bd.runnerUp) + ' pts)</h4><table class="compare-table"><tr><th></th><th>Pred</th><th>Actual</th><th>Pts</th></tr>';
       bh += '<tr><td>Winner</td><td>' + pred.winner + '</td><td>' + state.actualResults.winner + '</td><td class="' + (bd.winner>0?'match':'no-match') + '">' + bd.winner + '</td></tr>';
       bh += '<tr><td>Runner-up</td><td>' + pred.runnerUp + '</td><td>' + state.actualResults.runnerUp + '</td><td class="' + (bd.runnerUp>0?'match':'no-match') + '">' + bd.runnerUp + '</td></tr></table>';
-
       if (bd.details.runs) {
-        bh += '<h4 style="font-size:0.85em;color:var(--gold);margin:12px 0 4px;">Top 5 Runs (' + bd.runs + ' pts)</h4>';
-        bh += '<table class="compare-table"><tr><th>#</th><th>Predicted</th><th>Actual</th><th>Pts</th></tr>';
-        bd.details.runs.forEach((d, i) => {
-          bh += '<tr><td>' + (i+1) + '</td><td>' + (d.player||'-') + '</td><td>' + ((state.actualResults.runs||[])[i]||'-') + '</td><td class="' + (d.pts>0?'match':'no-match') + '">' + d.pts + '</td></tr>';
-        });
+        bh += '<h4 style="font-size:0.85em;color:var(--gold);margin:12px 0 4px;">Top 5 Runs (' + bd.runs + ' pts)</h4><table class="compare-table"><tr><th>#</th><th>Pred</th><th>Actual</th><th>Pts</th></tr>';
+        bd.details.runs.forEach((d, i) => { bh += '<tr><td>' + (i+1) + '</td><td>' + (d.player||'-') + '</td><td>' + ((state.actualResults.runs||[])[i]||'-') + '</td><td class="' + (d.pts>0?'match':'no-match') + '">' + d.pts + '</td></tr>'; });
         bh += '</table>';
       }
-
       if (bd.details.wickets) {
-        bh += '<h4 style="font-size:0.85em;color:var(--gold);margin:12px 0 4px;">Top 5 Wickets (' + bd.wickets + ' pts)</h4>';
-        bh += '<table class="compare-table"><tr><th>#</th><th>Predicted</th><th>Actual</th><th>Pts</th></tr>';
-        bd.details.wickets.forEach((d, i) => {
-          bh += '<tr><td>' + (i+1) + '</td><td>' + (d.player||'-') + '</td><td>' + ((state.actualResults.wickets||[])[i]||'-') + '</td><td class="' + (d.pts>0?'match':'no-match') + '">' + d.pts + '</td></tr>';
-        });
+        bh += '<h4 style="font-size:0.85em;color:var(--gold);margin:12px 0 4px;">Top 5 Wickets (' + bd.wickets + ' pts)</h4><table class="compare-table"><tr><th>#</th><th>Pred</th><th>Actual</th><th>Pts</th></tr>';
+        bd.details.wickets.forEach((d, i) => { bh += '<tr><td>' + (i+1) + '</td><td>' + (d.player||'-') + '</td><td>' + ((state.actualResults.wickets||[])[i]||'-') + '</td><td class="' + (d.pts>0?'match':'no-match') + '">' + d.pts + '</td></tr>'; });
         bh += '</table>';
       }
-
       bh += '<h4 style="font-size:0.85em;color:var(--gold);margin:12px 0 4px;">MVP (' + bd.mvp + ' pts)</h4>';
-      bh += '<p style="font-size:0.9em;">Predicted: <strong>' + pred.mvp + '</strong> | Actual: <strong>' + state.actualResults.mvp +
-        '</strong> \u2014 <span class="' + (bd.mvp>0?'match':'no-match') + '">' + (bd.mvp>0?'Match!':'No match') + '</span></p>';
+      bh += '<p style="font-size:0.9em;">Predicted: <strong>' + pred.mvp + '</strong> | Actual: <strong>' + state.actualResults.mvp + '</strong> \u2014 <span class="' + (bd.mvp>0?'match':'no-match') + '">' + (bd.mvp>0?'Match!':'No match') + '</span></p>';
     }
     bh += '</div></div>';
   });
@@ -1083,22 +1885,102 @@ function toggleBreakdown(id) { var el = document.getElementById(id); if (el) el.
 // =================== EXPORT ===================
 function exportLeaderboard() {
   const entries = Object.entries(state.scores).sort((a, b) => b[1].total - a[1].total);
-  if (!entries.length) { showToast('No scores to export!', true); return; }
-
+  if (!entries.length) { showToast('No scores!', true); return; }
   const medals = ['\u{1F3C6}','\u{1F948}','\u{1F949}'];
-  let text = '\u{1F3CF} IPL 2026 PREDICTION CONTEST - RESULTS \u{1F3CF}\n' + '\u2501'.repeat(40) + '\n\n';
+  const gName = currentGroupName || 'Contest';
+  let text = '\u{1F3CF} IPL 2026 PREDICTION CONTEST \u{1F3CF}\nGroup: ' + gName + '\n' + '\u2501'.repeat(40) + '\n\n';
   entries.forEach(([name, bd], i) => {
     text += (i<3?medals[i]:(i+1)+'.') + ' ' + name + ' \u2014 ' + bd.total + ' pts\n';
     text += '   Rankings: ' + bd.ranking + ' | W/RU: ' + (bd.winner+bd.runnerUp) + ' | Runs: ' + bd.runs + ' | Wkts: ' + bd.wickets + ' | MVP: ' + bd.mvp + '\n\n';
   });
   text += '\u2501'.repeat(40) + '\nPowered by IPL 2026 Prediction Contest';
-
-  const box = document.getElementById('exportBox');
-  box.textContent = text; box.classList.remove('hidden');
-  navigator.clipboard.writeText(text).then(() => showToast('Copied to clipboard!')).catch(() => showToast('Check the box below to copy'));
+  const box = document.getElementById('exportBox'); box.textContent = text; box.classList.remove('hidden');
+  navigator.clipboard.writeText(text).then(() => showToast('Copied!')).catch(() => showToast('Check box below'));
 }
 
-// =================== GO ===================
+// =================== EXPORT ALL PREDICTIONS ===================
+function getPredictionRows() {
+  // Build rows: each row is a category/label, columns are participants
+  const participants = state.participants.filter(p => !!state.predictions[p]);
+  const rows = [];
+
+  // Row labels
+  const labels = [];
+  for (let i = 0; i < 10; i++) labels.push('Rank #' + (i + 1));
+  labels.push('Winner', 'Runner-up');
+  for (let i = 0; i < 5; i++) labels.push('Run Scorer #' + (i + 1));
+  for (let i = 0; i < 5; i++) labels.push('Wicket Taker #' + (i + 1));
+  labels.push('MVP');
+
+  labels.forEach((label, idx) => {
+    const row = { label: label };
+    participants.forEach(p => {
+      const pred = state.predictions[p];
+      let val = '—';
+      if (idx < 10) {
+        val = (pred.teamRanking && pred.teamRanking[idx]) || '—';
+      } else if (idx === 10) {
+        val = pred.winner || '—';
+      } else if (idx === 11) {
+        val = pred.runnerUp || '—';
+      } else if (idx >= 12 && idx < 17) {
+        val = (pred.runs && pred.runs[idx - 12]) || '—';
+      } else if (idx >= 17 && idx < 22) {
+        val = (pred.wickets && pred.wickets[idx - 17]) || '—';
+      } else if (idx === 22) {
+        val = pred.mvp || '—';
+      }
+      row[p] = val;
+    });
+    rows.push(row);
+  });
+
+  return { participants, rows };
+}
+
+function showAllPredictionsGrid() {
+  const { participants, rows } = getPredictionRows();
+  const div = document.getElementById('allPredictionsGrid');
+
+  if (!participants.length) {
+    div.innerHTML = '<p style="color:var(--muted);">No predictions submitted yet.</p>';
+    return;
+  }
+
+  let h = '<table class="export-grid"><thead><tr><th class="row-label">Category</th>';
+  participants.forEach(p => { h += '<th>' + p + '</th>'; });
+  h += '</tr></thead><tbody>';
+
+  rows.forEach(row => {
+    h += '<tr><td class="row-label">' + row.label + '</td>';
+    participants.forEach(p => { h += '<td>' + (row[p] || '—') + '</td>'; });
+    h += '</tr>';
+  });
+
+  h += '</tbody></table>';
+  div.innerHTML = h;
+}
+
+function downloadPredictionsCSV() {
+  const { participants, rows } = getPredictionRows();
+
+  if (!participants.length) { showToast('No predictions to export!', true); return; }
+
+  let csv = 'Category,' + participants.map(p => '"' + p.replace(/"/g, '""') + '"').join(',') + '\n';
+  rows.forEach(row => {
+    csv += '"' + row.label + '",' + participants.map(p => '"' + (row[p] || '—').replace(/"/g, '""') + '"').join(',') + '\n';
+  });
+
+  const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a');
+  a.href = url;
+  a.download = 'ipl-2026-predictions-' + (currentGroupName || 'contest') + '.csv';
+  a.click();
+  URL.revokeObjectURL(url);
+  showToast('CSV downloaded!');
+}
+
 boot();
 </script>
 </body>
