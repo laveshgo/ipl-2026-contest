@@ -291,6 +291,19 @@
     /* Prediction expand view */
     .pred-expand-row { border: none !important; padding: 0 !important; margin-top: -10px !important; }
   }
+
+  /* Share Card Modal */
+  .share-modal-overlay { position:fixed; inset:0; z-index:9999; display:flex; align-items:center; justify-content:center; padding:16px; background:rgba(0,0,0,0.75); backdrop-filter:blur(8px); }
+  .share-modal-overlay.hidden { display:none; }
+  .share-modal { width:100%; max-width:420px; }
+  .share-modal-header { display:flex; align-items:center; justify-content:space-between; margin-bottom:12px; }
+  .share-modal-header h3 { color:#fff; font-size:0.95em; font-weight:700; }
+  .share-modal-close { width:32px; height:32px; border-radius:50%; background:rgba(255,255,255,0.1); border:none; color:#fff; font-size:1.2em; cursor:pointer; display:flex; align-items:center; justify-content:center; }
+  .share-modal-actions { display:flex; gap:10px; margin-top:12px; }
+  .share-modal-actions button { flex:1; padding:12px; border:none; border-radius:10px; font-weight:700; font-size:0.9em; cursor:pointer; display:flex; align-items:center; justify-content:center; gap:6px; transition:opacity 0.2s; }
+  .share-modal-actions button:disabled { opacity:0.5; }
+  .share-btn-download { background:#fff; color:#000; }
+  .share-btn-share { background:var(--accent); color:#fff; }
 </style>
 </head>
 <body>
@@ -435,6 +448,7 @@
       <button class="btn btn-primary" id="submitBtn" onclick="submitPrediction()">Submit Prediction</button>
       <button class="btn btn-secondary" onclick="clearForm()">Clear Form</button>
       <button class="btn btn-secondary" id="lockMyPredBtn" onclick="lockMyPrediction()" style="display:none; background:var(--accent2); border-color:var(--accent2);">&#128274; Lock My Prediction</button>
+      <button class="btn btn-gold btn-small" id="shareMyPredBtn" onclick="openShareCard()" style="display:none;">&#128247; Share as Image</button>
     </div>
   </div>
 
@@ -648,10 +662,26 @@
   </div>
 </div>
 
+<!-- Share Card Modal -->
+<div class="share-modal-overlay hidden" id="shareModal" onclick="if(event.target===this)closeShareModal()">
+  <div class="share-modal">
+    <div class="share-modal-header">
+      <h3>Share Your Prediction</h3>
+      <button class="share-modal-close" onclick="closeShareModal()">&times;</button>
+    </div>
+    <div id="shareCardContainer"></div>
+    <div class="share-modal-actions">
+      <button class="share-btn-download" id="shareDownloadBtn" onclick="shareCardAction('download')">&#11015; Download</button>
+      <button class="share-btn-share" id="shareShareBtn" onclick="shareCardAction('share')">&#8599; Share</button>
+    </div>
+  </div>
+</div>
+
 <div class="toast" id="toast"></div>
 
 <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-database-compat.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
 
 <script>
 const TEAMS = ["Chennai Super Kings","Mumbai Indians","Royal Challengers Bengaluru","Kolkata Knight Riders","Delhi Capitals","Rajasthan Royals","Punjab Kings","SunRisers Hyderabad","Gujarat Titans","Lucknow Super Giants"];
@@ -1717,6 +1747,8 @@ function loadPredictionForPlayer(name) {
       if (w) w.value = (pred.wickets && pred.wickets[i]) || '';
     }
     document.getElementById('lockedBanner').classList.remove('hidden');
+    // Show share button when prediction exists
+    document.getElementById('shareMyPredBtn').style.display = 'inline-flex';
     // Show user-lock warning & lock button
     const userLockBanner = document.getElementById('userLockedBanner');
     const lockMyBtn = document.getElementById('lockMyPredBtn');
@@ -1738,6 +1770,7 @@ function loadPredictionForPlayer(name) {
     document.getElementById('lockedBanner').classList.add('hidden');
     document.getElementById('userLockedBanner').classList.add('hidden');
     document.getElementById('lockMyPredBtn').style.display = 'none';
+    document.getElementById('shareMyPredBtn').style.display = 'none';
     if (!isPredictionLocked()) {
       document.getElementById('submitBtn').disabled = false;
       document.getElementById('submitBtn').textContent = 'Submit Prediction';
@@ -1747,7 +1780,7 @@ function loadPredictionForPlayer(name) {
 
 document.getElementById('currentPlayer').addEventListener('change', function() {
   if (this.value) loadPredictionForPlayer(this.value);
-  else { clearForm(); document.getElementById('lockedBanner').classList.add('hidden'); document.getElementById('userLockedBanner').classList.add('hidden'); document.getElementById('lockMyPredBtn').style.display = 'none'; }
+  else { clearForm(); document.getElementById('lockedBanner').classList.add('hidden'); document.getElementById('userLockedBanner').classList.add('hidden'); document.getElementById('lockMyPredBtn').style.display = 'none'; document.getElementById('shareMyPredBtn').style.display = 'none'; }
 });
 
 function submitPrediction() {
@@ -1786,10 +1819,11 @@ function doSubmitPrediction() {
   fbSet('predictions', state.predictions);
   showToast('Prediction saved for ' + name + '!');
   document.getElementById('lockedBanner').classList.remove('hidden');
-  // Show lock button after successful submission
+  // Show lock & share buttons after successful submission
   if (!state.userLocks[name]) {
     document.getElementById('lockMyPredBtn').style.display = 'inline-block';
   }
+  document.getElementById('shareMyPredBtn').style.display = 'inline-flex';
 }
 
 function clearForm() {
@@ -2320,6 +2354,185 @@ function downloadPredictionsCSV() {
   a.click();
   URL.revokeObjectURL(url);
   showToast('CSV downloaded!');
+}
+
+// =================== SHARE PREDICTION AS IMAGE ===================
+
+function openShareCard() {
+  const name = document.getElementById('currentPlayer').value;
+  if (!name || !state.predictions[name]) { showToast('No prediction to share!', true); return; }
+  const pred = state.predictions[name];
+  const groupName = currentGroupName || 'IPL 2026';
+
+  // Build the card HTML with inline styles (for html2canvas)
+  const tc = (team) => TEAM_COLORS[team] || { bg:'#333', text:'#fff' };
+  const abbr = (team) => getTeamAbbrShort(team);
+
+  let teamPills = '';
+  (pred.teamRanking || []).forEach((team, i) => {
+    const c = tc(team);
+    const isQ = i < 4;
+    teamPills += '<div style="display:inline-flex;align-items:center;gap:5px;padding:4px 8px;border-radius:8px;'
+      + 'background:' + (isQ ? c.bg + '20' : 'rgba(255,255,255,0.05)') + ';'
+      + 'border:1px solid ' + (isQ ? c.bg + '40' : 'rgba(255,255,255,0.06)') + ';">'
+      + '<span style="font-size:10px;font-weight:900;color:' + (isQ ? c.bg : 'rgba(255,255,255,0.3)') + ';font-variant-numeric:tabular-nums;">' + (i+1) + '</span>'
+      + '<span style="display:inline-flex;align-items:center;justify-content:center;width:22px;height:22px;border-radius:5px;background:' + c.bg + ';color:' + c.text + ';font-size:7px;font-weight:900;">' + abbr(team) + '</span>'
+      + '</div>';
+  });
+
+  // Winner card
+  const wc = pred.winner ? tc(pred.winner) : null;
+  const rc = pred.runnerUp ? tc(pred.runnerUp) : null;
+
+  function playerList(arr, emoji, label, color) {
+    let h = '<div style="padding:12px;border-radius:12px;background:' + color + '08;border:1px solid ' + color + '18;">'
+      + '<div style="display:flex;align-items:center;gap:5px;margin-bottom:8px;">'
+      + '<span style="font-size:12px;">' + emoji + '</span>'
+      + '<span style="font-size:8px;font-weight:800;color:' + color + ';text-transform:uppercase;letter-spacing:1.5px;">' + label + '</span></div>';
+    arr.filter(Boolean).forEach((p, i) => {
+      h += '<div style="display:flex;align-items:center;gap:6px;margin-bottom:3px;">'
+        + '<span style="font-size:9px;font-weight:900;color:' + color + ';width:12px;text-align:center;font-variant-numeric:tabular-nums;">' + (i+1) + '</span>'
+        + '<span style="font-size:11px;font-weight:600;color:rgba(255,255,255,0.85);">' + p + '</span></div>';
+    });
+    h += '</div>';
+    return h;
+  }
+
+  function finalistCard(team, emoji, label, labelColor, shadowAlpha) {
+    if (!team) return '<div style="flex:1;"></div>';
+    const c = tc(team);
+    return '<div style="flex:1;padding:14px 12px;border-radius:14px;text-align:center;'
+      + 'background:linear-gradient(135deg,' + c.bg + (shadowAlpha || '18') + ',' + c.bg + '05);'
+      + 'border:1px solid ' + c.bg + '30;">'
+      + '<div style="font-size:20px;margin-bottom:4px;">' + emoji + '</div>'
+      + '<div style="font-size:8px;font-weight:800;color:' + labelColor + ';text-transform:uppercase;letter-spacing:1.5px;margin-bottom:8px;">' + label + '</div>'
+      + '<div style="display:inline-flex;align-items:center;justify-content:center;width:36px;height:36px;border-radius:10px;background:' + c.bg + ';color:' + c.text + ';font-size:10px;font-weight:900;box-shadow:0 4px 12px ' + c.bg + '40;">' + abbr(team) + '</div>'
+      + '<div style="font-size:11px;font-weight:700;color:#fff;margin-top:6px;">' + team + '</div>'
+      + '</div>';
+  }
+
+  const cardHTML = '<div id="shareCardInner" style="'
+    + 'background:linear-gradient(160deg,#0a0e1a 0%,#111827 40%,#0f172a 100%);'
+    + 'border-radius:20px;padding:28px 24px;font-family:-apple-system,BlinkMacSystemFont,Segoe UI,Roboto,sans-serif;'
+    + 'overflow:hidden;position:relative;">'
+
+    // BG decoration
+    + '<div style="position:absolute;top:-60px;right:-60px;width:200px;height:200px;border-radius:50%;'
+    + 'background:' + (wc ? wc.bg + '15' : 'rgba(233,69,96,0.05)') + ';filter:blur(40px);"></div>'
+    + '<div style="position:absolute;bottom:-40px;left:-40px;width:150px;height:150px;border-radius:50%;'
+    + 'background:' + (rc ? rc.bg + '10' : 'rgba(99,102,241,0.05)') + ';filter:blur(30px);"></div>'
+
+    // Header
+    + '<div style="position:relative;margin-bottom:20px;">'
+    + '<div style="display:flex;align-items:center;justify-content:space-between;">'
+    + '<div>'
+    + '<div style="font-size:18px;font-weight:900;color:#fff;letter-spacing:-0.3px;">' + name + '</div>'
+    + '<div style="font-size:11px;font-weight:600;color:rgba(255,255,255,0.4);margin-top:2px;text-transform:uppercase;letter-spacing:1px;">' + groupName + '</div>'
+    + '</div>'
+    + '<div style="text-align:right;">'
+    + '<div style="font-size:12px;font-weight:800;color:#e94560;text-transform:uppercase;letter-spacing:0.5px;">IPL 2026</div>'
+    + '<div style="font-size:10px;font-weight:600;color:rgba(255,255,255,0.3);margin-top:2px;">Prediction Contest</div>'
+    + '</div></div></div>'
+
+    // Divider
+    + '<div style="height:1px;background:linear-gradient(90deg,transparent,rgba(255,255,255,0.1),transparent);margin-bottom:18px;"></div>'
+
+    // Points Table
+    + '<div style="margin-bottom:18px;">'
+    + '<div style="font-size:9px;font-weight:800;color:rgba(255,255,255,0.35);text-transform:uppercase;letter-spacing:1.5px;margin-bottom:10px;">Points Table Prediction</div>'
+    + '<div style="display:flex;flex-wrap:wrap;gap:6px;">' + teamPills + '</div></div>'
+
+    // Winner & Runner-up
+    + '<div style="display:flex;gap:10px;margin-bottom:18px;">'
+    + finalistCard(pred.winner, '&#127942;', 'Champion', '#FFD700', '18')
+    + finalistCard(pred.runnerUp, '&#129352;', 'Runner-up', '#C0C0C0', '10')
+    + '</div>'
+
+    // Players grid
+    + '<div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:18px;">'
+    + playerList(pred.runs || [], '&#127951;', 'Top Runs', '#62B4FF')
+    + playerList(pred.wickets || [], '&#9889;', 'Top Wickets', '#A78BFA')
+    + '</div>'
+
+    // MVP
+    + (pred.mvp ? '<div style="padding:12px 14px;border-radius:12px;background:linear-gradient(135deg,rgba(255,215,0,0.08),rgba(255,215,0,0.02));border:1px solid rgba(255,215,0,0.15);display:flex;align-items:center;gap:10px;margin-bottom:16px;">'
+    + '<div style="width:32px;height:32px;border-radius:50%;background:#FFD700;color:#000;display:flex;align-items:center;justify-content:center;font-size:14px;font-weight:900;flex-shrink:0;">&#11088;</div>'
+    + '<div><div style="font-size:8px;font-weight:800;color:#FFD700;text-transform:uppercase;letter-spacing:1.5px;">Player of the Tournament</div>'
+    + '<div style="font-size:13px;font-weight:800;color:#fff;margin-top:2px;">' + pred.mvp + '</div></div></div>' : '')
+
+    // Footer
+    + '<div style="display:flex;align-items:center;justify-content:space-between;padding-top:12px;border-top:1px solid rgba(255,255,255,0.06);">'
+    + '<div style="font-size:9px;font-weight:600;color:rgba(255,255,255,0.25);">IPL 2026 Prediction Contest</div>'
+    + '<div style="font-size:9px;font-weight:600;color:rgba(255,255,255,0.25);">'
+    + (pred.submittedAt ? new Date(pred.submittedAt).toLocaleDateString('en-IN', { day:'numeric', month:'short', year:'numeric' }) : '')
+    + '</div></div>'
+
+    + '</div>';
+
+  document.getElementById('shareCardContainer').innerHTML = cardHTML;
+  document.getElementById('shareModal').classList.remove('hidden');
+}
+
+function closeShareModal() {
+  document.getElementById('shareModal').classList.add('hidden');
+  document.getElementById('shareCardContainer').innerHTML = '';
+}
+
+async function shareCardAction(action) {
+  const card = document.getElementById('shareCardInner');
+  if (!card) return;
+  const dlBtn = document.getElementById('shareDownloadBtn');
+  const shBtn = document.getElementById('shareShareBtn');
+  dlBtn.disabled = shBtn.disabled = true;
+
+  try {
+    const canvas = await html2canvas(card, { backgroundColor: null, scale: 2, useCORS: true, logging: false });
+    const name = document.getElementById('currentPlayer').value || 'prediction';
+
+    const shareCaption = 'Here are my predictions for IPL 2026! 🏏';
+
+    if (action === 'download') {
+      const link = document.createElement('a');
+      link.download = name.replace(/\s+/g, '-') + '-IPL-2026-prediction.png';
+      link.href = canvas.toDataURL('image/png');
+      link.click();
+      showToast('Image downloaded!');
+    } else {
+      canvas.toBlob(async (blob) => {
+        if (!blob) return;
+        const file = new File([blob], 'prediction.png', { type: 'image/png' });
+        if (navigator.share && navigator.canShare && navigator.canShare({ files: [file] })) {
+          try {
+            await navigator.share({
+              text: shareCaption,
+              files: [file],
+            });
+          } catch (e) { /* cancelled */ }
+        } else {
+          // Fallback: copy caption to clipboard + download image
+          try {
+            await navigator.clipboard.writeText(shareCaption);
+            const link = document.createElement('a');
+            link.download = name.replace(/\s+/g, '-') + '-IPL-2026-prediction.png';
+            link.href = canvas.toDataURL('image/png');
+            link.click();
+            showToast('Image downloaded & caption copied — paste it along with the image!');
+          } catch {
+            const link = document.createElement('a');
+            link.download = 'prediction.png';
+            link.href = canvas.toDataURL('image/png');
+            link.click();
+            showToast('Image downloaded!');
+          }
+        }
+      }, 'image/png');
+    }
+  } catch (err) {
+    console.error('Share card error:', err);
+    showToast('Failed to generate image', true);
+  } finally {
+    dlBtn.disabled = shBtn.disabled = false;
+  }
 }
 
 boot();
