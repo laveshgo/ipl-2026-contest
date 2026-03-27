@@ -56,13 +56,9 @@
   .rank-item:active { cursor: grabbing; }
   .rank-item.dragging { opacity: 0.4; border-color: var(--accent); }
   .rank-item.drag-over { border-color: var(--gold); transform: scale(1.02); }
-  .rank-item.touch-dragging { position: fixed; z-index: 9999; pointer-events: none; box-shadow: 0 8px 32px rgba(0,0,0,0.5); border-color: var(--gold); background: var(--card); opacity: 0.95; width: calc(100% - 40px); max-width: 860px; }
-  .rank-item.touch-placeholder { opacity: 0.2; border-style: dashed; border-color: var(--gold); }
-  .rank-item.drop-target-above { border-top: 3px solid var(--gold); margin-top: -3px; }
-  .rank-item.drop-target-below { border-bottom: 3px solid var(--gold); margin-bottom: 5px; }
-  .rank-item .drag-handle { display: none; color: var(--muted); font-size: 1.3em; flex-shrink: 0; padding: 8px 6px; cursor: grab; touch-action: none; }
+  .rank-item.touch-active { box-shadow: 0 0 0 2px var(--gold); z-index: 20; }
+  .rank-item .drag-handle { display: none; color: var(--muted); font-size: 1.3em; flex-shrink: 0; padding: 8px 6px; cursor: grab; }
   .rank-item .drag-handle:active { cursor: grabbing; color: var(--accent); }
-  @media (max-width: 600px) { .rank-item .drag-handle { display: flex; } }
   .rank-number { width: 32px; height: 32px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-weight: 700; font-size: 0.85em; flex-shrink: 0; }
   .rank-number.r1 { background: var(--gold); color: #000; }
   .rank-number.r2 { background: var(--silver); color: #000; }
@@ -1128,8 +1124,8 @@ function showToast(msg, isError) {
 }
 
 // =================== RANK LIST ===================
-// Touch drag state
-var touchDrag = { active: false, el: null, clone: null, containerId: null, startY: 0, startX: 0, team: null, placeholder: null, scrollInterval: null };
+// Touch drag state — long press to activate, row follows finger
+var touchDrag = { active: false, containerId: null, startY: 0, fromIdx: null, overIdx: null, rowHeight: 0, longPressTimer: null };
 
 function createRankList(containerId, teams) {
   const ul = document.getElementById(containerId); if (!ul) return;
@@ -1149,137 +1145,138 @@ function createRankList(containerId, teams) {
     li.addEventListener('dragleave', () => li.classList.remove('drag-over'));
     li.addEventListener('drop', (e) => { e.preventDefault(); li.classList.remove('drag-over'); const from = e.dataTransfer.getData('text/plain'); if (from !== team) reorderList(containerId, from, team); });
 
-    // Touch drag — only from drag handle
-    const handle = li.querySelector('.drag-handle');
-    handle.addEventListener('touchstart', function(e) {
-      e.preventDefault();
+    // Touch drag — long press anywhere on row to activate
+    li.addEventListener('touchstart', function(e) {
       if (e.touches.length > 1) return;
-      const t = e.touches[0];
+      var t = e.touches[0];
       touchDrag.startY = t.clientY;
-      touchDrag.startX = t.clientX;
-      touchDrag.team = team;
+      touchDrag.active = false;
+      touchDrag.fromIdx = null;
+      touchDrag.overIdx = null;
       touchDrag.containerId = containerId;
-      touchDrag.el = li;
-      touchDrag.moved = false;
-      startTouchDrag(li, t, containerId, team);
-    }, { passive: false });
 
-    li.addEventListener('touchmove', function(e) {
-      if (touchDrag.active && touchDrag.el === li) {
-        e.preventDefault();
-        moveTouchDrag(e.touches[0]);
-      }
-    }, { passive: false });
-
-    li.addEventListener('touchend', function(e) {
-      if (touchDrag.active && touchDrag.el === li) {
-        endTouchDrag();
-      }
+      touchDrag.longPressTimer = setTimeout(function() {
+        var items = Array.from(ul.children);
+        var idx = items.indexOf(li);
+        touchDrag.active = true;
+        touchDrag.fromIdx = idx;
+        touchDrag.overIdx = idx;
+        var rect = li.getBoundingClientRect();
+        touchDrag.rowHeight = rect.height + 8; // include margin
+        li.classList.add('touch-active');
+        if (navigator.vibrate) navigator.vibrate(30);
+      }, 300);
     }, { passive: true });
 
     ul.appendChild(li);
   });
-}
 
-function startTouchDrag(li, touch, containerId, team) {
-  touchDrag.active = true;
-  const rect = li.getBoundingClientRect();
+  // Non-passive touchmove on the list container for long-press drag (only add once)
+  if (!ul._touchDragBound) {
+  ul._touchDragBound = true;
+  ul.addEventListener('touchmove', function(e) {
+    var touchY = e.touches[0].clientY;
 
-  // Create floating clone
-  const clone = li.cloneNode(true);
-  clone.classList.add('touch-dragging');
-  clone.style.left = rect.left + 'px';
-  clone.style.top = rect.top + 'px';
-  clone.style.width = rect.width + 'px';
-  document.body.appendChild(clone);
-  touchDrag.clone = clone;
-  touchDrag.offsetY = touch.clientY - rect.top;
-
-  // Mark original as placeholder
-  li.classList.add('touch-placeholder');
-
-  // Vibrate if supported
-  if (navigator.vibrate) navigator.vibrate(30);
-}
-
-function moveTouchDrag(touch) {
-  if (!touchDrag.clone) return;
-  const y = touch.clientY - touchDrag.offsetY;
-  touchDrag.clone.style.top = y + 'px';
-
-  // Auto-scroll near edges
-  const edgeZone = 60;
-  if (touch.clientY < edgeZone) {
-    window.scrollBy(0, -8);
-  } else if (touch.clientY > window.innerHeight - edgeZone) {
-    window.scrollBy(0, 8);
-  }
-
-  // Find which item we're over
-  const ul = document.getElementById(touchDrag.containerId);
-  if (!ul) return;
-  const items = Array.from(ul.children);
-  items.forEach(item => {
-    item.classList.remove('drop-target-above', 'drop-target-below');
-  });
-
-  for (const item of items) {
-    if (item === touchDrag.el) continue;
-    const r = item.getBoundingClientRect();
-    const mid = r.top + r.height / 2;
-    if (touch.clientY >= r.top && touch.clientY <= r.bottom) {
-      if (touch.clientY < mid) {
-        item.classList.add('drop-target-above');
-      } else {
-        item.classList.add('drop-target-below');
+    // Cancel long press if finger moves before activation
+    if (!touchDrag.active) {
+      if (Math.abs(touchY - touchDrag.startY) > 5) {
+        cancelLongPress();
       }
-      touchDrag.dropTarget = item;
-      touchDrag.dropBefore = touch.clientY < mid;
-      break;
+      return;
     }
-  }
+
+    e.preventDefault();
+
+    var fromIdx = touchDrag.fromIdx;
+    if (fromIdx === null) return;
+    var items = Array.from(ul.children);
+
+    // Move dragged row to follow finger
+    var draggedRow = items[fromIdx];
+    if (draggedRow) {
+      var offsetY = touchY - touchDrag.startY;
+      draggedRow.style.transform = 'translateY(' + offsetY + 'px)';
+    }
+
+    // Find which slot the finger is over
+    var overIdx = fromIdx;
+    for (var i = 0; i < items.length; i++) {
+      var row = items[i];
+      if (i === fromIdx) continue;
+      var rect = row.getBoundingClientRect();
+      var midY = rect.top + rect.height / 2;
+      if (i < fromIdx && touchY < midY + touchDrag.rowHeight * 0.3) {
+        overIdx = i;
+        break;
+      }
+      if (i > fromIdx && touchY > midY - touchDrag.rowHeight * 0.3) {
+        overIdx = i;
+      }
+    }
+
+    touchDrag.overIdx = overIdx;
+
+    // Shift other rows to make room
+    for (var i = 0; i < items.length; i++) {
+      var row = items[i];
+      if (i === fromIdx) continue;
+      row.style.transition = 'transform 0.15s ease';
+      if (fromIdx < overIdx && i > fromIdx && i <= overIdx) {
+        row.style.transform = 'translateY(-' + touchDrag.rowHeight + 'px)';
+      } else if (fromIdx > overIdx && i >= overIdx && i < fromIdx) {
+        row.style.transform = 'translateY(' + touchDrag.rowHeight + 'px)';
+      } else {
+        row.style.transform = 'translateY(0)';
+      }
+    }
+  }, { passive: false });
+
+  // Touch end — finalize reorder
+  ul.addEventListener('touchend', function() {
+    cancelLongPress();
+    if (!touchDrag.active || touchDrag.fromIdx === null) {
+      touchDrag.active = false;
+      return;
+    }
+
+    var fromIdx = touchDrag.fromIdx;
+    var toIdx = touchDrag.overIdx;
+
+    // Clear all inline styles
+    Array.from(ul.children).forEach(function(row) {
+      row.style.transform = '';
+      row.style.transition = '';
+      row.style.zIndex = '';
+      row.classList.remove('touch-active');
+    });
+
+    // Perform reorder if moved
+    if (toIdx !== null && fromIdx !== toIdx) {
+      var order = getListOrder(ul.id);
+      var moved = order.splice(fromIdx, 1)[0];
+      order.splice(toIdx, 0, moved);
+      createRankList(ul.id, order);
+
+      // Flash dropped item
+      if (ul.children[toIdx]) {
+        ul.children[toIdx].style.borderColor = 'var(--gold)';
+        ul.children[toIdx].style.background = 'rgba(245,197,24,0.08)';
+        setTimeout(function() { if (ul.children[toIdx]) { ul.children[toIdx].style.borderColor = ''; ul.children[toIdx].style.background = ''; } }, 400);
+      }
+    }
+
+    touchDrag.active = false;
+    touchDrag.fromIdx = null;
+    touchDrag.overIdx = null;
+  }, { passive: true });
+  } // end if !ul._touchDragBound
 }
 
-function endTouchDrag() {
-  if (touchDrag.clone) {
-    touchDrag.clone.remove();
+function cancelLongPress() {
+  if (touchDrag.longPressTimer) {
+    clearTimeout(touchDrag.longPressTimer);
+    touchDrag.longPressTimer = null;
   }
-
-  const ul = document.getElementById(touchDrag.containerId);
-  if (ul) {
-    Array.from(ul.children).forEach(item => {
-      item.classList.remove('touch-placeholder', 'drop-target-above', 'drop-target-below');
-    });
-  }
-
-  // Perform the reorder
-  if (touchDrag.dropTarget && touchDrag.dropTarget !== touchDrag.el) {
-    const order = getListOrder(touchDrag.containerId);
-    const fromTeam = touchDrag.team;
-    const toTeam = touchDrag.dropTarget.dataset.team;
-    const fromIdx = order.indexOf(fromTeam);
-    let toIdx = order.indexOf(toTeam);
-    order.splice(fromIdx, 1);
-    toIdx = order.indexOf(toTeam);
-    if (!touchDrag.dropBefore) toIdx++;
-    order.splice(toIdx, 0, fromTeam);
-    createRankList(touchDrag.containerId, order);
-
-    // Flash dropped item
-    const newUl = document.getElementById(touchDrag.containerId);
-    const newIdx = order.indexOf(fromTeam);
-    if (newUl && newUl.children[newIdx]) {
-      newUl.children[newIdx].style.borderColor = 'var(--gold)';
-      newUl.children[newIdx].style.background = 'rgba(245,197,24,0.08)';
-      setTimeout(() => { if (newUl.children[newIdx]) { newUl.children[newIdx].style.borderColor = ''; newUl.children[newIdx].style.background = ''; } }, 400);
-    }
-  }
-
-  touchDrag.active = false;
-  touchDrag.el = null;
-  touchDrag.clone = null;
-  touchDrag.dropTarget = null;
-  touchDrag.longPressTimer = null;
 }
 function getListOrder(id) { const el = document.getElementById(id); return el ? Array.from(el.children).map(li => li.dataset.team) : [...TEAMS]; }
 function reorderList(id, from, to) { const o = getListOrder(id); o.splice(o.indexOf(from), 1); o.splice(o.indexOf(to), 0, from); createRankList(id, o); }
