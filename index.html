@@ -598,6 +598,11 @@
         <label>Off by 1 position</label><input type="number" id="sc_rankOff1" value="5" min="0">
         <label>Off by 2 positions</label><input type="number" id="sc_rankOff2" value="2" min="0">
       </div>
+      <h3 style="margin-top:24px; font-size:0.95em; color:var(--accent);">Top 4 Bonus</h3>
+      <div class="scoring-grid" style="margin-top:8px;">
+        <label>Each correct team in top 4 (regardless of order)</label><input type="number" id="sc_top4Bonus" value="5" min="0">
+      </div>
+      <p style="font-size:0.78em; color:var(--muted); margin-top:4px;">Stacks with ranking points. Max 4 &times; bonus = 20 pts.</p>
       <h3 style="margin-top:24px; font-size:0.95em; color:var(--accent);">Winner & Runner-up</h3>
       <div class="scoring-grid" style="margin-top:8px;">
         <label>Correct Winner</label><input type="number" id="sc_winner" value="25" min="0">
@@ -725,7 +730,7 @@ function teamColorBar(team) {
   return c ? 'border-left:4px solid '+c.bg+';' : '';
 }
 
-const DEFAULT_SCORING = { rankExact:10, rankOff1:5, rankOff2:2, winner:25, runnerUp:15, runsExact:15, runsPartial:5, wicketsExact:15, wicketsPartial:5, mvp:30 };
+const DEFAULT_SCORING = { rankExact:10, rankOff1:5, rankOff2:2, top4Bonus:5, winner:25, runnerUp:15, runsExact:15, runsPartial:5, wicketsExact:15, wicketsPartial:5, mvp:30 };
 
 // Default deadline: March 28 2026, 7:30 PM IST (= 2:00 PM UTC)
 const DEFAULT_DEADLINE = '2026-03-28T19:30:00+05:30';
@@ -2071,8 +2076,8 @@ function loadScoring() {
   updateMaxPoints();
 }
 function updateMaxPoints() {
-  const s = state.scoring, max = (s.rankExact*10) + s.winner + s.runnerUp + (s.runsExact*5) + (s.wicketsExact*5) + s.mvp;
-  document.getElementById('maxPointsDisplay').textContent = 'Maximum possible score: ' + max + ' pts (Rankings: ' + (s.rankExact*10) + ', Winner: ' + s.winner + ', RU: ' + s.runnerUp + ', Runs: ' + (s.runsExact*5) + ', Wickets: ' + (s.wicketsExact*5) + ', MVP: ' + s.mvp + ')';
+  const s = state.scoring, max = (s.rankExact*10) + ((s.top4Bonus||0)*4) + s.winner + s.runnerUp + (s.runsExact*5) + (s.wicketsExact*5) + s.mvp;
+  document.getElementById('maxPointsDisplay').textContent = 'Maximum possible score: ' + max + ' pts (Rankings: ' + (s.rankExact*10) + ', Top 4: ' + ((s.top4Bonus||0)*4) + ', Winner: ' + s.winner + ', RU: ' + s.runnerUp + ', Runs: ' + (s.runsExact*5) + ', Wickets: ' + (s.wicketsExact*5) + ', MVP: ' + s.mvp + ')';
 }
 
 // =================== CALCULATE ===================
@@ -2121,7 +2126,7 @@ function doCalculateScores() {
   state.scores = {};
   Object.entries(state.predictions).forEach(([name, pred]) => {
     let total = 0;
-    const bd = { ranking:0, winner:0, runnerUp:0, runs:0, wickets:0, mvp:0, details:{} };
+    const bd = { ranking:0, top4:0, winner:0, runnerUp:0, runs:0, wickets:0, mvp:0, details:{} };
     let rp = 0; const rd = [];
     (pred.teamRanking||[]).forEach((team, pi) => {
       const ai = (actual.teamRanking||[]).indexOf(team);
@@ -2131,6 +2136,12 @@ function doCalculateScores() {
       rp += pts; rd.push({team, predicted:pi+1, actual:ai+1, pts});
     });
     bd.ranking = rp; bd.details.ranking = rd; total += rp;
+    // Top 4 bonus: each predicted top-4 team that appears in actual top 4
+    const predTop4 = (pred.teamRanking||[]).slice(0, 4);
+    const actualTop4 = (actual.teamRanking||[]).slice(0, 4);
+    let t4p = 0; const t4d = [];
+    predTop4.forEach(team => { const hit = actualTop4.includes(team); const pts = hit ? (s.top4Bonus||0) : 0; t4p += pts; t4d.push({team, inTop4:hit, pts}); });
+    bd.top4 = t4p; bd.details.top4 = t4d; total += t4p;
     if (fuzzyMatch(pred.winner, actual.winner)) { bd.winner = s.winner; total += s.winner; }
     if (fuzzyMatch(pred.runnerUp, actual.runnerUp)) { bd.runnerUp = s.runnerUp; total += s.runnerUp; }
     let runsP = 0; const runsD = []; const actualRuns = actual.runs || [];
@@ -2213,9 +2224,9 @@ function renderLeaderboard() {
   const entries = Object.entries(state.scores).sort((a, b) => b[1].total - a[1].total);
   if (!entries.length) { document.getElementById('leaderboardContent').innerHTML = '<p style="color:var(--muted);">No scores yet.</p>'; document.getElementById('breakdownContent').innerHTML = ''; return; }
   const medals = ['&#127942;','&#129352;','&#129353;'];
-  let html = '<div class="leaderboard-wrap"><table class="leaderboard-table"><thead><tr><th>#</th><th>Player</th><th>Rankings</th><th>W/RU</th><th>Runs</th><th>Wkts</th><th>MVP</th><th>Total</th></tr></thead><tbody>';
+  let html = '<div class="leaderboard-wrap"><table class="leaderboard-table"><thead><tr><th>#</th><th>Player</th><th>Rankings</th><th>Top 4</th><th>W/RU</th><th>Runs</th><th>Wkts</th><th>MVP</th><th>Total</th></tr></thead><tbody>';
   entries.forEach(([name, bd], i) => {
-    html += '<tr><td>' + (i < 3 ? '<span class="medal">' + medals[i] + '</span>' : (i+1)) + '</td><td><strong>' + name + '</strong></td><td>' + bd.ranking + '</td><td>' + (bd.winner+bd.runnerUp) + '</td><td>' + bd.runs + '</td><td>' + bd.wickets + '</td><td>' + bd.mvp + '</td><td><span class="points-badge' + (i===0?' gold':'') + '">' + bd.total + '</span></td></tr>';
+    html += '<tr><td>' + (i < 3 ? '<span class="medal">' + medals[i] + '</span>' : (i+1)) + '</td><td><strong>' + name + '</strong></td><td>' + bd.ranking + '</td><td>' + (bd.top4||0) + '</td><td>' + (bd.winner+bd.runnerUp) + '</td><td>' + bd.runs + '</td><td>' + bd.wickets + '</td><td>' + bd.mvp + '</td><td><span class="points-badge' + (i===0?' gold':'') + '">' + bd.total + '</span></td></tr>';
   });
   html += '</tbody></table></div>';
   document.getElementById('leaderboardContent').innerHTML = html;
@@ -2227,6 +2238,11 @@ function renderLeaderboard() {
     if (bd.details && bd.details.ranking) {
       bh += '<h4 style="font-size:0.85em;color:var(--gold);margin:8px 0 4px;">Team Rankings (' + bd.ranking + ' pts)</h4><table class="compare-table"><tr><th>Team</th><th>Pred</th><th>Actual</th><th>Pts</th></tr>';
       bd.details.ranking.forEach(d => { bh += '<tr><td>' + d.team + '</td><td>' + d.predicted + '</td><td>' + d.actual + '</td><td class="' + (d.pts>0?'match':'no-match') + '">' + d.pts + '</td></tr>'; });
+      bh += '</table>';
+    }
+    if (bd.details && bd.details.top4) {
+      bh += '<h4 style="font-size:0.85em;color:var(--gold);margin:12px 0 4px;">Top 4 Bonus (' + (bd.top4||0) + ' pts)</h4><table class="compare-table"><tr><th>Team</th><th>In Top 4?</th><th>Pts</th></tr>';
+      bd.details.top4.forEach(d => { bh += '<tr><td>' + d.team + '</td><td class="' + (d.inTop4?'match':'no-match') + '">' + (d.inTop4?'Yes':'No') + '</td><td class="' + (d.pts>0?'match':'no-match') + '">' + d.pts + '</td></tr>'; });
       bh += '</table>';
     }
     const pred = state.predictions[name];
@@ -2263,7 +2279,7 @@ function exportLeaderboard() {
   let text = '\u{1F3CF} IPL 2026 PREDICTION CONTEST \u{1F3CF}\nGroup: ' + gName + '\n' + '\u2501'.repeat(40) + '\n\n';
   entries.forEach(([name, bd], i) => {
     text += (i<3?medals[i]:(i+1)+'.') + ' ' + name + ' \u2014 ' + bd.total + ' pts\n';
-    text += '   Rankings: ' + bd.ranking + ' | W/RU: ' + (bd.winner+bd.runnerUp) + ' | Runs: ' + bd.runs + ' | Wkts: ' + bd.wickets + ' | MVP: ' + bd.mvp + '\n\n';
+    text += '   Rankings: ' + bd.ranking + ' | Top 4: ' + (bd.top4||0) + ' | W/RU: ' + (bd.winner+bd.runnerUp) + ' | Runs: ' + bd.runs + ' | Wkts: ' + bd.wickets + ' | MVP: ' + bd.mvp + '\n\n';
   });
   text += '\u2501'.repeat(40) + '\nPowered by IPL 2026 Prediction Contest';
   const box = document.getElementById('exportBox'); box.textContent = text; box.classList.remove('hidden');
