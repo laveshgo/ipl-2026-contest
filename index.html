@@ -2087,18 +2087,7 @@ function normalize(str) { return (str || '').toLowerCase().replace(/[^a-z0-9]/g,
 function fuzzyMatch(a, b) {
   const na = normalize(a), nb = normalize(b);
   if (!na || !nb) return false;
-  if (na === nb) return true;
-  // One contains the other (e.g. "Virat" matches "Virat Kohli")
-  if (na.includes(nb) || nb.includes(na)) return true;
-  // Check last name match (e.g. "Kohli" matches "Virat Kohli")
-  const partsA = (a || '').toLowerCase().trim().split(/\s+/);
-  const partsB = (b || '').toLowerCase().trim().split(/\s+/);
-  const lastA = partsA[partsA.length - 1], lastB = partsB[partsB.length - 1];
-  if (lastA.length > 2 && lastB.length > 2 && lastA === lastB) return true;
-  // Try matching against the canonical player list
-  const canonA = findCanonicalPlayer(a), canonB = findCanonicalPlayer(b);
-  if (canonA && canonB && canonA === canonB) return true;
-  return false;
+  return na === nb;
 }
 
 function findCanonicalPlayer(input) {
